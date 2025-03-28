@@ -59,6 +59,8 @@ export function PriceHistoryChart({ data }) {
             strokeWidth={2}
             activeDot={{ r: 8 }}
           />
+
+          
         </LineChart>
       </ResponsiveContainer>
     </div>

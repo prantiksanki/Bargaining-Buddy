@@ -16,37 +16,56 @@ function App() {
   return (
     <Router>
       <ThemeProvider>
-        <div className="flex min-h-screen flex-col">
+        <div className="flex flex-col min-h-screen">
           <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="container flex h-14 items-center">
+            <div className="container flex items-center h-14">
               <Link to="/" className="flex items-center gap-2 font-semibold">
                 <span className="text-primary">BargainBuddy</span>
               </Link>
-              <div className="flex flex-1 items-center justify-end space-x-4">
+              <div className="flex items-center justify-end flex-1 space-x-4">
+
+                
                 <nav className="flex items-center space-x-2">
+
+                  
                   <Link
                     to="/deals"
-                    className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-                  >
+                    className="text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
+                  > 
                     Deals
                   </Link>
+
+
+                  
                   <Link
                     to="/alerts"
-                    className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                    className="text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
                   >
                     Price Alerts
                   </Link>
+
+
+                  
                   <Link
                     to="/history"
-                    className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                    className="text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
                   >
                     History
                   </Link>
+
+
+                  
                   <ThemeToggle />
+
+                  
                 </nav>
               </div>
             </div>
+            
           </header>
+
+
+
 
           <Routes>
             <Route path="/" element={<HomePage />} />
@@ -56,27 +75,30 @@ function App() {
             <Route path="/product/:id" element={<ProductPage />} />
           </Routes>
 
-          <footer className="w-full border-t py-6">
+
+
+
+          <footer className="w-full py-6 border-t">
             <div className="container flex flex-col items-center justify-between gap-4 md:flex-row">
-              <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
+              <p className="text-sm leading-loose text-center text-muted-foreground md:text-left">
                 © 2023 BargainBuddy. All rights reserved.
               </p>
               <div className="flex gap-4">
                 <Link
                   to="/terms"
-                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                  className="text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
                 >
                   Terms
                 </Link>
                 <Link
                   to="/privacy"
-                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                  className="text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
                 >
                   Privacy
                 </Link>
                 <Link
                   to="/contact"
-                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                  className="text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
                 >
                   Contact
                 </Link>
@@ -88,6 +110,9 @@ function App() {
     </Router>
   )
 }
+
+
+
 
 function HomePage() {
   return (
@@ -104,15 +129,20 @@ function HomePage() {
                   Compare prices from multiple retailers and save money on your purchases.
                 </p>
               </div>
+
+
+              
               <div className="flex flex-col gap-2 min-[400px]:flex-row">
                 <div className="relative flex-1">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     type="search"
                     placeholder="Search for products..."
-                    className="w-full bg-background pl-8 rounded-md border"
+                    className="w-full pl-8 border rounded-md bg-background"
                   />
                 </div>
+
+                
                 <Button type="submit">Search</Button>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -133,6 +163,8 @@ function HomePage() {
           </div>
         </div>
       </section>
+
+
 
       <section className="w-full py-12 md:py-24 lg:py-32">
         <div className="container px-4 md:px-6">
@@ -167,8 +199,8 @@ function HomePage() {
 
 function DealsPage() {
   return (
-    <main className="flex-1 container py-12">
-      <h1 className="text-3xl font-bold mb-6">Today's Best Deals</h1>
+    <main className="container flex-1 py-12">
+      <h1 className="mb-6 text-3xl font-bold">Today's Best Deals</h1>
       <p>Deals page content will go here</p>
     </main>
   )
@@ -176,8 +208,8 @@ function DealsPage() {
 
 function AlertsPage() {
   return (
-    <main className="flex-1 container py-12">
-      <h1 className="text-3xl font-bold mb-6">Your Price Alerts</h1>
+    <main className="container flex-1 py-12">
+      <h1 className="mb-6 text-3xl font-bold">Your Price Alerts</h1>
       <p>Alerts page content will go here</p>
     </main>
   )
@@ -185,8 +217,8 @@ function AlertsPage() {
 
 function HistoryPage() {
   return (
-    <main className="flex-1 container py-12">
-      <h1 className="text-3xl font-bold mb-6">Browsing History</h1>
+    <main className="container flex-1 py-12">
+      <h1 className="mb-6 text-3xl font-bold">Browsing History</h1>
       <p>History page content will go here</p>
     </main>
   )
@@ -194,8 +226,8 @@ function HistoryPage() {
 
 function ProductPage() {
   return (
-    <main className="flex-1 container py-12">
-      <h1 className="text-3xl font-bold mb-6">Product Details</h1>
+    <main className="container flex-1 py-12">
+      <h1 className="mb-6 text-3xl font-bold">Product Details</h1>
       <ProductComparison />
     </main>
   )
@@ -215,13 +247,13 @@ function ProductComparisonSkeleton() {
       {Array(3)
         .fill(0)
         .map((_, i) => (
-          <div key={i} className="rounded-lg border bg-card text-card-foreground shadow-sm">
+          <div key={i} className="border rounded-lg shadow-sm bg-card text-card-foreground">
             <div className="p-6 space-y-4">
-              <Skeleton className="h-4 w-1/2" />
-              <Skeleton className="h-20 w-full" />
+              <Skeleton className="w-1/2 h-4" />
+              <Skeleton className="w-full h-20" />
               <div className="space-y-2">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="w-full h-4" />
+                <Skeleton className="w-2/3 h-4" />
               </div>
             </div>
           </div>
@@ -236,11 +268,11 @@ function SearchResultsSkeleton() {
       {Array(4)
         .fill(0)
         .map((_, i) => (
-          <div key={i} className="rounded-lg border bg-card text-card-foreground shadow-sm">
+          <div key={i} className="border rounded-lg shadow-sm bg-card text-card-foreground">
             <div className="p-6 space-y-4">
-              <Skeleton className="h-4 w-1/2" />
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-4 w-2/3" />
+              <Skeleton className="w-1/2 h-4" />
+              <Skeleton className="w-full h-12" />
+              <Skeleton className="w-2/3 h-4" />
             </div>
           </div>
         ))}
