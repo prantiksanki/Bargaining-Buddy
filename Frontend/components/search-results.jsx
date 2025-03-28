@@ -1,5 +1,8 @@
+"use client"
 import Image from "next/image"
 import Link from "next/link"
+const {useEffect, useState} = require("react")
+import axios from "axios";
 
 import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
@@ -7,44 +10,67 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 
 export default function SearchResults() {
   // This would typically come from an API or props
-  const results = [
-    {
-      id: "1",
-      name: "Apple iPhone 15 Pro",
-      image: "/placeholder.svg?height=200&width=200",
-      category: "Electronics",
-      lowestPrice: 999.0,
-      savings: 200.0,
-      retailers: 6,
-    },
-    {
-      id: "2",
-      name: 'Samsung 65" QLED 4K TV',
-      image: "/placeholder.svg?height=200&width=200",
-      category: "Electronics",
-      lowestPrice: 1299.99,
-      savings: 400.0,
-      retailers: 5,
-    },
-    {
-      id: "3",
-      name: "Dyson V12 Vacuum",
-      image: "/placeholder.svg?height=200&width=200",
-      category: "Home",
-      lowestPrice: 499.99,
-      savings: 100.0,
-      retailers: 4,
-    },
-    {
-      id: "4",
-      name: "Nike Air Max 270",
-      image: "/placeholder.svg?height=200&width=200",
-      category: "Fashion",
-      lowestPrice: 129.99,
-      savings: 50.0,
-      retailers: 8,
-    },
-  ]
+  // const results = [
+  //   {
+  //     id: "1",
+  //     name: "Apple iPhone 15 Pro",
+  //     image: "/placeholder.svg?height=200&width=200",
+  //     category: "Electronics",
+  //     lowestPrice: 999.0,
+  //     savings: 200.0,
+  //     retailers: 6,
+  //   },
+  //   {
+  //     id: "2",
+  //     name: 'Samsung 65" QLED 4K TV',
+  //     image: "/placeholder.svg?height=200&width=200",
+  //     category: "Electronics",
+  //     lowestPrice: 1299.99,
+  //     savings: 400.0,
+  //     retailers: 5,
+  //   },
+  //   {
+  //     id: "3",
+  //     name: "Dyson V12 Vacuum",
+  //     image: "/placeholder.svg?height=200&width=200",
+  //     category: "Home",
+  //     lowestPrice: 499.99,
+  //     savings: 100.0,
+  //     retailers: 4,
+  //   },
+  //   {
+  //     id: "4",
+  //     name: "Nike Air Max 270",
+  //     image: "/placeholder.svg?height=200&width=200",
+  //     category: "Fashion",
+  //     lowestPrice: 129.99,
+  //     savings: 50.0,
+  //     retailers: 8,
+  //   },
+  // ]
+
+
+  const [results, setResults] = useState(null)
+  
+    useEffect(() => {
+      const fetchProduct = async () => {
+        try {
+          const response = await axios.get("http://localhost:5000/search");
+          setResults(response.data);
+          console.log(response.data); 
+        } catch (error) {
+          console.error("Error fetching product:", error);
+        }
+      };
+    
+      fetchProduct();
+    }, []);
+    
+    
+    if (!results) {
+      return <p>Loading product details...</p>;
+    }
+  
 
   return (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">

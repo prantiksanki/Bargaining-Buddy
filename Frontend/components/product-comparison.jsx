@@ -1,5 +1,6 @@
 "use client"
 
+import {useState, useEffect} from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowUpDown, ExternalLink, Heart } from "lucide-react"
@@ -8,33 +9,62 @@ import { Button } from "./ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
 import { PriceHistoryChart } from "./price-history-chart"
+const axios = require('axios');
+
+// const cors = require("cors");
+// app.use(cors({ origin: "http://localhost:3000"}));
+
 
 export default function ProductComparison() {
   // This would typically come from an API or props
-  const product = {
-    id: "1",
-    name: "Sony WH-1000XM4 Wireless Noise Cancelling Headphones",
-    image: "/placeholder.svg?height=300&width=300",
-    description: "Industry-leading noise cancellation with Dual Noise Sensor technology",
-    category: "Electronics",
-    prices: [
-      { retailer: "Amazon", price: 278.0, url: "#", inStock: true },
-      { retailer: "Best Buy", price: 299.99, url: "#", inStock: true },
-      { retailer: "Walmart", price: 289.0, url: "#", inStock: false },
-      { retailer: "Target", price: 299.99, url: "#", inStock: true },
-    ],
-    lowestPrice: 278.0,
-    highestPrice: 349.99,
-    averagePrice: 298.0,
-    priceHistory: [
-      { date: "Jan", amazon: 349, bestbuy: 349, walmart: 349, target: 349 },
-      { date: "Feb", amazon: 329, bestbuy: 349, walmart: 339, target: 349 },
-      { date: "Mar", amazon: 329, bestbuy: 329, walmart: 329, target: 329 },
-      { date: "Apr", amazon: 299, bestbuy: 329, walmart: 319, target: 329 },
-      { date: "May", amazon: 299, bestbuy: 299, walmart: 299, target: 299 },
-      { date: "Jun", amazon: 278, bestbuy: 299, walmart: 289, target: 299 },
-    ],
+  // const product = {
+  //   id: "1",
+  //   name: "Sony WH-1000XM4 Wireless Noise Cancelling Headphones",
+  //   image: "https://www.bhphotovideo.com/images/images2500x2500/sony_wh1000xm4_s_wh_1000xm4_wireless_noise_canceling_over_ear_1582976.jpg?height=300&width=300",
+  //   description: "Industry-leading noise cancellation with Dual Noise Sensor technology",
+  //   category: "Electronics",
+  //   prices: [
+  //     { retailer: "Amazon", price: 278.0, url: "#", inStock: true },
+  //     { retailer: "Best Buy", price: 299.99, url: "#", inStock: true },
+  //     { retailer: "Walmart", price: 289.0, url: "#", inStock: false },
+  //     { retailer: "Target", price: 299.99, url: "#", inStock: true },
+  //   ],
+  //   lowestPrice: 278.0,
+  //   highestPrice: 349.99,
+  //   averagePrice: 298.0,
+  //   priceHistory: [
+  //     { date: "Jan", amazon: 349, bestbuy: 349, walmart: 349, target: 349 },
+  //     { date: "Feb", amazon: 329, bestbuy: 349, walmart: 339, target: 349 },
+  //     { date: "Mar", amazon: 329, bestbuy: 329, walmart: 329, target: 329 },
+  //     { date: "Apr", amazon: 299, bestbuy: 329, walmart: 319, target: 329 },
+  //     { date: "May", amazon: 299, bestbuy: 299, walmart: 299, target: 299 },
+  //     { date: "Jun", amazon: 278, bestbuy: 299, walmart: 289, target: 299 },
+  //   ],
+  // }
+
+  const [product, setProduct] = useState(null)
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/products");
+        setProduct(response.data);
+        console.log(response.data); 
+      } catch (error) {
+        console.error("Error fetching product:", error);
+      }
+    };
+  
+    fetchProduct();
+  }, []);
+  
+  
+  if (!product) {
+    return <p>Loading product details...</p>;
   }
+
+  
+  
 
   return (
     <Card className="w-full">
@@ -49,12 +79,10 @@ export default function ProductComparison() {
               <Image src={product.image || "/placeholder.svg"} alt={product.name} fill className="object-cover" />
             </div>
             <div className="flex justify-between">
-              <div>
-                <p className="text-sm font-medium">Price Range</p>
-                <p className="text-2xl font-bold">
-                  ${product.lowestPrice.toFixed(2)} - ${product.highestPrice.toFixed(2)}
-                </p>
-              </div>
+            <p className="text-2xl font-bold">
+          ${product?.lowestPrice ? product.lowestPrice.toFixed(2) : "N/A"} - 
+          ${product?.highestPrice ? product.highestPrice.toFixed(2) : "N/A"}
+            </p>
               <Button variant="outline" size="icon">
                 <Heart className="w-4 h-4" />
                 <span className="sr-only">Add to favorites</span>

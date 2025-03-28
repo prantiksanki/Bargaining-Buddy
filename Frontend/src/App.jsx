@@ -187,9 +187,13 @@ function HomePage() {
               <h2 className="text-3xl font-bold tracking-tighter">Recent Searches</h2>
               <p className="text-muted-foreground">Products you've recently viewed</p>
             </div>
+
+            
             <Suspense fallback={<SearchResultsSkeleton />}>
               <SearchResults />
             </Suspense>
+
+            
           </div>
         </div>
       </section>
