@@ -1,120 +1,77 @@
-"use client"
-import Image from "next/image"
-import Link from "next/link"
-const {useEffect, useState} = require("react")
+"use client";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import axios from "axios";
 
-import { Badge } from "./ui/badge"
-import { Button } from "./ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card"
+import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
 
 export default function SearchResults() {
-  // This would typically come from an API or props
-  // const results = [
-  //   {
-  //     id: "1",
-  //     name: "Apple iPhone 15 Pro",
-  //     image: "/placeholder.svg?height=200&width=200",
-  //     category: "Electronics",
-  //     lowestPrice: 999.0,
-  //     savings: 200.0,
-  //     retailers: 6,
-  //   },
-  //   {
-  //     id: "2",
-  //     name: 'Samsung 65" QLED 4K TV',
-  //     image: "/placeholder.svg?height=200&width=200",
-  //     category: "Electronics",
-  //     lowestPrice: 1299.99,
-  //     savings: 400.0,
-  //     retailers: 5,
-  //   },
-  //   {
-  //     id: "3",
-  //     name: "Dyson V12 Vacuum",
-  //     image: "/placeholder.svg?height=200&width=200",
-  //     category: "Home",
-  //     lowestPrice: 499.99,
-  //     savings: 100.0,
-  //     retailers: 4,
-  //   },
-  //   {
-  //     id: "4",
-  //     name: "Nike Air Max 270",
-  //     image: "/placeholder.svg?height=200&width=200",
-  //     category: "Fashion",
-  //     lowestPrice: 129.99,
-  //     savings: 50.0,
-  //     retailers: 8,
-  //   },
-  // ]
+  const [results, setResults] = useState([]);
 
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/search");
+        setResults(response.data || []); // Ensure results is always an array
+        console.log(response.data);
+      } catch (error) {
+        console.error("Error fetching product:", error);
+      }
+    };
 
-  const [results, setResults] = useState(null)
-  
-    useEffect(() => {
-      const fetchProduct = async () => {
-        try {
-          const response = await axios.get("http://localhost:5000/search");
-          setResults(response.data);
-          console.log(response.data); 
-        } catch (error) {
-          console.error("Error fetching product:", error);
-        }
-      };
-    
-      fetchProduct();
-    }, []);
-    
-    
-    if (!results) {
-      return <p>Loading product details...</p>;
-    }
-  
+    fetchProduct();
+  }, []);
+
+  if (!results.length) {
+    return <p>Loading product details...</p>;
+  }
 
   return (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
       {results.map((result) => (
-        <Card key={result.id} className="overflow-hidden">
-          <div className="relative aspect-square">
-            <Image
-              src={result.image || "/placeholder.svg"}
-              alt={result.name}
-              fill
-              className="object-cover transition-transform hover:scale-105"
-            />
-          </div>
-          <CardHeader className="p-4">
-            <div className="flex items-start justify-between">
-              <CardTitle className="text-base line-clamp-2">{result.name}</CardTitle>
-              <Badge variant="outline" className="ml-2 shrink-0">
-                {result.category}
-              </Badge>
+        result.id ? ( // Ensure result.id exists before rendering the Link
+          <Card key={result.id} className="overflow-hidden">
+            <div className="relative aspect-square">
+              <img
+                src={result.image || "/placeholder.svg"}
+                alt={result.name}
+                className="object-cover w-full h-full transition-transform hover:scale-105"
+              />
             </div>
-            <CardDescription>Compare prices from {result.retailers} retailers</CardDescription>
-          </CardHeader>
-          <CardContent className="p-4 pt-0">
-            <div className="flex items-baseline justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Lowest price</p>
-                <p className="text-xl font-bold">${result.lowestPrice.toFixed(2)}</p>
+            <div className="p-4 border-b">
+              <div className="flex items-start justify-between">
+                <h3 className="text-base font-bold line-clamp-2">{result.name}</h3>
+                <Badge variant="outline" className="ml-2 shrink-0">
+                  {result.category}
+                </Badge>
               </div>
-              <div className="text-right">
-                <p className="text-sm text-muted-foreground">Potential savings</p>
-                <p className="text-lg font-medium text-emerald-600 dark:text-emerald-400">
-                  Up to ${result.savings.toFixed(2)}
-                </p>
+              <p className="text-sm text-muted-foreground">Compare prices from {result.retailers} retailers</p>
+            </div>
+            <div className="p-4">
+              <div className="flex items-baseline justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Lowest price</p>
+                  <p className="text-xl font-bold">${result.lowestPrice.toFixed(2)}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-muted-foreground">Potential savings</p>
+                  <p className="text-lg font-medium text-emerald-600 dark:text-emerald-400">
+                    Up to ${result.savings.toFixed(2)}
+                  </p>
+                </div>
               </div>
             </div>
-          </CardContent>
-          <CardFooter className="p-4 pt-0">
-            <Button asChild className="w-full">
-              <Link href={`/product/${result.id}`}>Compare Prices</Link>
-            </Button>
-          </CardFooter>
-        </Card>
+            <div className="p-4 pt-0">
+              <Button asChild className="w-full">
+                <Link href={`/product/${result.id}`}>Compare Prices</Link>
+              </Button>
+            </div>
+          </Card>
+        ) : null // Skip rendering if result.id is undefined
       ))}
     </div>
-  )
+  );
 }
-

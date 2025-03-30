@@ -2,14 +2,14 @@
 
 import { useState } from "react"
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom"
-import { Search } from "lucide-react"
 
 import { ThemeProvider } from "./components/ThemeProvider"
 import { ThemeToggle } from "./components/ThemeToggle"
 import ProductComparison from "./components/ProductComparison"
 import SearchResults from "./components/SearchResults"
+import SearchDropdown from "./components/SearchDropdown"
+import ProductDetailsPage from "./pages/ProductDetailsPage"
 import Button from "./components/ui/Button"
-import Input from "./components/ui/Input"
 import Skeleton from "./components/ui/Skeleton"
 
 function App() {
@@ -23,60 +23,38 @@ function App() {
                 <span className="text-primary">BargainBuddy</span>
               </Link>
               <div className="flex items-center justify-end flex-1 space-x-4">
-
-                
                 <nav className="flex items-center space-x-2">
-
-                  
                   <Link
                     to="/deals"
                     className="text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
-                  > 
+                  >
                     Deals
                   </Link>
-
-
-                  
                   <Link
                     to="/alerts"
                     className="text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
                   >
                     Price Alerts
                   </Link>
-
-
-                  
                   <Link
                     to="/history"
                     className="text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
                   >
                     History
                   </Link>
-
-
-                  
                   <ThemeToggle />
-
-                  
                 </nav>
               </div>
             </div>
-            
           </header>
-
-
-
 
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/deals" element={<DealsPage />} />
             <Route path="/alerts" element={<AlertsPage />} />
             <Route path="/history" element={<HistoryPage />} />
-            <Route path="/product/:id" element={<ProductPage />} />
+            <Route path="/product/:id" element={<ProductDetailsPage />} />
           </Routes>
-
-
-
 
           <footer className="w-full py-6 border-t">
             <div className="container flex flex-col items-center justify-between gap-4 md:flex-row">
@@ -111,9 +89,6 @@ function App() {
   )
 }
 
-
-
-
 function HomePage() {
   return (
     <main className="flex-1">
@@ -129,20 +104,8 @@ function HomePage() {
                   Compare prices from multiple retailers and save money on your purchases.
                 </p>
               </div>
-
-
-              
               <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                <div className="relative flex-1">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="search"
-                    placeholder="Search for products..."
-                    className="w-full pl-8 border rounded-md bg-background"
-                  />
-                </div>
-
-                
+                <SearchDropdown />
                 <Button type="submit">Search</Button>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -163,8 +126,6 @@ function HomePage() {
           </div>
         </div>
       </section>
-
-
 
       <section className="w-full py-12 md:py-24 lg:py-32">
         <div className="container px-4 md:px-6">
@@ -187,13 +148,9 @@ function HomePage() {
               <h2 className="text-3xl font-bold tracking-tighter">Recent Searches</h2>
               <p className="text-muted-foreground">Products you've recently viewed</p>
             </div>
-
-            
             <Suspense fallback={<SearchResultsSkeleton />}>
               <SearchResults />
             </Suspense>
-
-            
           </div>
         </div>
       </section>
@@ -224,15 +181,6 @@ function HistoryPage() {
     <main className="container flex-1 py-12">
       <h1 className="mb-6 text-3xl font-bold">Browsing History</h1>
       <p>History page content will go here</p>
-    </main>
-  )
-}
-
-function ProductPage() {
-  return (
-    <main className="container flex-1 py-12">
-      <h1 className="mb-6 text-3xl font-bold">Product Details</h1>
-      <ProductComparison />
     </main>
   )
 }

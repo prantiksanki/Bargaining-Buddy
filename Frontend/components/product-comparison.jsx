@@ -11,9 +11,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
 import { PriceHistoryChart } from "./price-history-chart"
 const axios = require('axios');
 
-// const cors = require("cors");
-// app.use(cors({ origin: "http://localhost:3000"}));
-
 
 export default function ProductComparison() {
   // This would typically come from an API or props

@@ -1,3 +1,5 @@
+"use client";
+
 import { Link } from "react-router-dom"
 import Button from "./ui/Button"
 import Card from "./ui/Card"
@@ -57,7 +59,7 @@ export default function SearchResults() {
           </div>
           <div className="p-4 border-b">
             <div className="flex items-start justify-between">
-              <h3 className="line-clamp-2 text-base font-bold">{result.name}</h3>
+              <h3 className="text-base font-bold line-clamp-2">{result.name}</h3>
               <Badge variant="outline" className="ml-2 shrink-0">
                 {result.category}
               </Badge>
