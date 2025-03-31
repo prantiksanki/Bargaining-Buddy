@@ -22,7 +22,7 @@ export default function SearchDropdown({ value, onChange }) {
     }
   
     // Fetch real search results
-    fetch(`/products?search=${value}`)
+    fetch(`http://localhost:5000/products?search=${value}`)
       .then((res) => res.json())
       .then((data) => {
         setSearchResults(data)
