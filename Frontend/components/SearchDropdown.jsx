@@ -2,44 +2,33 @@
 
 import { useState, useRef, useEffect } from "react"
 import { Search, X } from "lucide-react"
-import { useNavigate } from "react-router-dom"
-import Input from "./ui/Input"
+import { useRouter } from "next/navigation"
+import { Input } from "./ui/input"
 
-export default function SearchDropdown() {
-  const [searchTerm, setSearchTerm] = useState("")
+export default function SearchDropdown({ value, onChange }) {
   const [isOpen, setIsOpen] = useState(false)
   const [searchResults, setSearchResults] = useState([])
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const dropdownRef = useRef(null)
   const inputRef = useRef(null)
-  const navigate = useNavigate()
-
-  // Mock search results - in a real app, this would come from an API
-  const mockProducts = [
-    { id: "1", name: "Apple iPhone 15 Pro", category: "Electronics" },
-    { id: "2", name: "Samsung Galaxy S23", category: "Electronics" },
-    { id: "3", name: "Sony WH-1000XM4 Headphones", category: "Audio" },
-    { id: "4", name: "LG C2 OLED TV", category: "TVs" },
-    { id: "5", name: "Dyson V12 Vacuum", category: "Home" },
-    { id: "6", name: "Nike Air Max 270", category: "Fashion" },
-    { id: "7", name: "PlayStation 5", category: "Gaming" },
-    { id: "8", name: "MacBook Pro M2", category: "Computers" },
-  ]
-
-  // Filter products based on search term
+  const router = useRouter()
+  
+  // Fetch real search results
   useEffect(() => {
-    if (searchTerm.trim() === "") {
+    if (value.trim() === "") {
       setSearchResults([])
       setIsOpen(false)
       return
     }
-
-    const filtered = mockProducts.filter((product) => product.name.toLowerCase().includes(searchTerm.toLowerCase()))
-
-    setSearchResults(filtered)
-    setIsOpen(filtered.length > 0)
-    setSelectedIndex(-1)
-  }, [searchTerm])
+  
+    // Fetch real search results
+    fetch(`/products?search=${value}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setSearchResults(data)
+        setIsOpen(data.length > 0)
+      })
+  }, [value])
 
   // Handle click outside to close dropdown
   useEffect(() => {
@@ -80,13 +69,13 @@ export default function SearchDropdown() {
   }
 
   const handleSelectProduct = (product) => {
-    setSearchTerm("")
+    onChange("")
     setIsOpen(false)
-    navigate(`/product/${product.id}`) // ✅ Corrected navigation
+    router.push(`/product/${product.id}`)
   }
 
   const clearSearch = () => {
-    setSearchTerm("")
+    onChange("")
     inputRef.current.focus()
   }
 
@@ -99,12 +88,12 @@ export default function SearchDropdown() {
           type="search"
           placeholder="Search for products..."
           className="w-full pl-8 pr-8 border rounded-md bg-background"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
           onFocus={() => searchResults.length > 0 && setIsOpen(true)}
         />
-        {searchTerm && (
+        {value && (
           <button
             className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
             onClick={clearSearch}

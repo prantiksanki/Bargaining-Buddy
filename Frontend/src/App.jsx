@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom"
 
 import { ThemeProvider } from "./components/ThemeProvider"
@@ -9,6 +9,7 @@ import ProductComparison from "./components/ProductComparison"
 import SearchResults from "./components/SearchResults"
 import SearchDropdown from "./components/SearchDropdown"
 import ProductDetailsPage from "./pages/ProductDetailsPage"
+import SearchResultsPage from "./pages/SearchResultsPage"
 import Button from "./components/ui/Button"
 import Skeleton from "./components/ui/Skeleton"
 
@@ -48,13 +49,20 @@ function App() {
             </div>
           </header>
 
+
+
+          
+
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/deals" element={<DealsPage />} />
             <Route path="/alerts" element={<AlertsPage />} />
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/product/:id" element={<ProductDetailsPage />} />
+            <Route path="/search" element={<SearchResultsPage />} />
           </Routes>
+
+
 
           <footer className="w-full py-6 border-t">
             <div className="container flex flex-col items-center justify-between gap-4 md:flex-row">
@@ -89,7 +97,24 @@ function App() {
   )
 }
 
+
+
+
 function HomePage() {
+  const [currentSearchTerm, setCurrentSearchTerm] = useState("")
+  const [searchFunction, setSearchFunction] = useState(null)
+
+  const handleSearchCallback = useCallback((searchTerm, searchFunc) => {
+    setCurrentSearchTerm(searchTerm)
+    setSearchFunction(searchFunc)
+  }, [])
+
+  const handleSearchButtonClick = () => {
+    if (searchFunction) {
+      searchFunction()
+    }
+  }
+
   return (
     <main className="flex-1">
       <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
@@ -104,10 +129,18 @@ function HomePage() {
                   Compare prices from multiple retailers and save money on your purchases.
                 </p>
               </div>
+
+              
               <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                <SearchDropdown />
-                <Button type="submit">Search</Button>
+                <SearchDropdown onSearch={handleSearchCallback} />
+                <Button type="button" onClick={handleSearchButtonClick}>
+                  Search
+                </Button>
               </div>
+
+
+
+              
               <div className="flex flex-wrap gap-2">
                 <Button variant="outline" size="sm">
                   Electronics
