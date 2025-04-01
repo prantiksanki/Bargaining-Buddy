@@ -22,11 +22,16 @@ export default function SearchDropdown({ value, onChange }) {
     }
   
     // Fetch real search results
-    fetch(`http://localhost:5000/products?search=${value}`)
+    fetch(`http://localhost:5000/products?search=${encodeURIComponent(value)}`)
       .then((res) => res.json())
       .then((data) => {
         setSearchResults(data)
         setIsOpen(data.length > 0)
+      })
+      .catch((error) => {
+        console.error("Error fetching search results:", error)
+        setSearchResults([])
+        setIsOpen(false)
       })
   }, [value])
 
@@ -48,80 +53,87 @@ export default function SearchDropdown({ value, onChange }) {
   const handleKeyDown = (e) => {
     if (!isOpen) return
 
-    if (e.key === "ArrowDown") {
-      e.preventDefault()
-      setSelectedIndex((prev) => (prev < searchResults.length - 1 ? prev + 1 : prev))
-    }
-
-    if (e.key === "ArrowUp") {
-      e.preventDefault()
-      setSelectedIndex((prev) => (prev > 0 ? prev - 1 : 0))
-    }
-
-    if (e.key === "Enter" && selectedIndex >= 0) {
-      e.preventDefault()
-      handleSelectProduct(searchResults[selectedIndex])
-    }
-
-    if (e.key === "Escape") {
-      setIsOpen(false)
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault()
+        setSelectedIndex((prev) => 
+          prev < searchResults.length - 1 ? prev + 1 : 0
+        )
+        break
+      case "ArrowUp":
+        e.preventDefault()
+        setSelectedIndex((prev) => 
+          prev > 0 ? prev - 1 : searchResults.length - 1
+        )
+        break
+      case "Enter":
+        e.preventDefault()
+        if (selectedIndex >= 0 && selectedIndex < searchResults.length) {
+          handleSelectProduct(searchResults[selectedIndex])
+        }
+        break
+      case "Escape":
+        e.preventDefault()
+        setIsOpen(false)
+        setSelectedIndex(-1)
+        break
     }
   }
 
   const handleSelectProduct = (product) => {
-    onChange("")
+    onChange(product.name)
     setIsOpen(false)
-    router.push(`/product/${product.id}`)
+    setSelectedIndex(-1)
+    router.push(`/products?search=${encodeURIComponent(product.name)}`)
   }
 
   const clearSearch = () => {
     onChange("")
-    inputRef.current.focus()
+    setSearchResults([])
+    setIsOpen(false)
+    setSelectedIndex(-1)
   }
 
   return (
-    <div className="relative flex-1" ref={dropdownRef}>
+    <div className="relative w-full" ref={dropdownRef}>
       <div className="relative">
-        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute w-4 h-4 -translate-y-1/2 left-3 top-1/2 text-muted-foreground" />
         <Input
           ref={inputRef}
-          type="search"
+          type="text"
           placeholder="Search for products..."
-          className="w-full pl-8 pr-8 border rounded-md bg-background"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          onFocus={() => searchResults.length > 0 && setIsOpen(true)}
+          className="pl-9 pr-9"
         />
         {value && (
           <button
-            className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
             onClick={clearSearch}
+            className="absolute -translate-y-1/2 right-3 top-1/2 text-muted-foreground hover:text-foreground"
           >
             <X className="w-4 h-4" />
-            <span className="sr-only">Clear search</span>
           </button>
         )}
       </div>
 
-      {isOpen && (
-        <div className="absolute z-50 w-full mt-1 overflow-y-auto border rounded-md shadow-lg bg-background max-h-80">
-          <div className="p-2 text-xs border-b text-muted-foreground">{searchResults.length} results found</div>
-          <ul>
-            {searchResults.map((product, index) => (
-              <li key={product.id}>
-                <button
-                  className={`w-full text-left px-4 py-2 hover:bg-muted flex items-center justify-between ${
-                    index === selectedIndex ? "bg-muted" : ""
-                  }`}
-                  onClick={() => handleSelectProduct(product)}
-                >
-                  <div>
-                    <div className="font-medium">{product.name}</div>
-                    <div className="text-xs text-muted-foreground">{product.category}</div>
-                  </div>
-                  <div className="text-xs text-primary">View details</div>
-                </button>
+      {isOpen && searchResults.length > 0 && (
+        <div className="absolute z-50 w-full mt-1 border rounded-md shadow-lg bg-background">
+          <ul className="py-1">
+            {searchResults.map((result, index) => (
+              <li
+                key={result._id || index}
+                className={`px-4 py-2 cursor-pointer hover:bg-muted ${
+                  index === selectedIndex ? "bg-muted" : ""
+                }`}
+                onClick={() => handleSelectProduct(result)}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">{result.name}</span>
+                  <span className="text-sm text-muted-foreground">
+                    ${result.lowestPrice?.toFixed(2) || "N/A"}
+                  </span>
+                </div>
               </li>
             ))}
           </ul>
