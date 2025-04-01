@@ -13,12 +13,14 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} min-h-screen bg-background`}>
+      <head />
+      <body className={`${inter.className} min-h-screen bg-background antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
+          storageKey="bargain-buddy-theme"
         >
           {children}
         </ThemeProvider>

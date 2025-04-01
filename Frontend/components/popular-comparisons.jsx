@@ -85,7 +85,7 @@ export default function PopularComparisons() {
             <CardContent>
               <div className="flex items-center justify-between">
                 <p className="text-lg font-bold">
-                  ${product.lowestPrice}
+                  Rs.{product.lowestPrice}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {product.category}
