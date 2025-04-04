@@ -25,9 +25,7 @@ export default function SearchResults({ searchTerm }) {
         console.log("Fetching products with search:", searchTerm);
         
         // If there's a search term, use the search endpoint
-        const url = searchTerm 
-          ? `http://localhost:5000/products?search=${encodeURIComponent(searchTerm)}`
-          : "http://localhost:5000/products";
+        const url = searchTerm ? `http://localhost:5000/products?search=${encodeURIComponent(searchTerm)}` : "http://localhost:5000/products";
           
         const response = await axios.get(url);
 
@@ -35,9 +33,12 @@ export default function SearchResults({ searchTerm }) {
         console.log("Fetched products:", response.data);
         
         // Check if response.data is an array
-        if (Array.isArray(response.data)) {
+        if (Array.isArray(response.data)) 
+        {
           setResults(response.data);
-        } else {
+        } 
+        else 
+        {
           console.error("Response data is not an array:", response.data);
           setError("Invalid response format");
           setResults([]);
@@ -113,7 +114,7 @@ export default function SearchResults({ searchTerm }) {
               <div className="p-4">
                 <div className="flex items-center justify-between">
                   <p className="text-lg font-bold">
-                    ${result.lowestPrice?.toFixed(2) || "N/A"}
+                    Rs. {result.lowestPrice?.toFixed(2) || "N/A"}
                   </p>
                   <Button variant="outline" size="sm">
                     View Details

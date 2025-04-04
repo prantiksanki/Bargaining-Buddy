@@ -41,11 +41,17 @@ export default function HomePage() {
               >
                 History
               </Link>
+              
               <ThemeToggle />
+
+              
             </nav>
           </div>
         </div>
       </header>
+
+
+      
       <main className="flex-1">
         <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
           <div className="container px-4 md:px-6">
@@ -63,11 +69,13 @@ export default function HomePage() {
               <div className="w-auto max-w-2xl">
                 <div className="flex flex-col gap-4 min-[400px]:flex-row">
                   <div className="relative flex-1 w-full">
+                    
                     <SearchDropdown 
                       value={searchTerm}
                       onChange={setSearchTerm}
                     />
                   </div>
+                  
                   <Button type="submit" className="min-[400px]:w-auto ">Search</Button>
                 </div>
                 </div>
@@ -98,12 +106,20 @@ export default function HomePage() {
                 <h2 className="text-3xl font-bold tracking-tighter">Popular Comparisons</h2>
                 <p className="text-muted-foreground">See what other shoppers are comparing right now</p>
               </div>
+
+              {/* whenever PopularComparisons will load dynamically, ProductComparisonSkeleton is display */}
               <Suspense fallback={<ProductComparisonSkeleton />}>
                 <PopularComparisons />
               </Suspense>
+
+
+              
             </div>
           </div>
         </section>
+
+
+
 
         <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
           <div className="container px-4 md:px-6">
@@ -119,6 +135,9 @@ export default function HomePage() {
           </div>
         </section>
       </main>
+
+
+      
       <footer className="w-full py-6 border-t">
         <div className="container flex flex-col items-center justify-between gap-4 md:flex-row">
           <p className="text-sm leading-loose text-center text-muted-foreground md:text-left">

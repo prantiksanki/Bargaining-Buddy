@@ -32,7 +32,7 @@ export default function ProductComparison({ product }) {
   // Safely format price with fallback
   const formatPrice = (price) => {
     if (price === undefined || price === null) return "N/A"
-    return `$${Number(price).toFixed(2)}`
+    return `Rs. ${Number(price).toFixed(2)}`
   }
 
   return (
@@ -65,11 +65,15 @@ export default function ProductComparison({ product }) {
             </div>
           </div>
           <div className="space-y-6">
+
+            
             <Tabs defaultValue="prices" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="prices">Price Comparison</TabsTrigger>
                 <TabsTrigger value="history">Price History</TabsTrigger>
               </TabsList>
+
+              
               <TabsContent value="prices" className="space-y-4">
                 <div className="border rounded-md bg-card">
                   <div className="flex items-center justify-between p-4 border-b">
@@ -85,7 +89,8 @@ export default function ProductComparison({ product }) {
                     </div>
                   </div>
                   <div className="divide-y">
-                    {Array.isArray(product.prices) && product.prices.length > 0 ? (
+                    {Array.isArray(product.prices) && product.prices.length > 0 ? 
+                    (
                       product.prices.map((price, index) => (
                         <div key={index} className="flex items-center justify-between p-4">
                           <div>
@@ -117,6 +122,8 @@ export default function ProductComparison({ product }) {
                   </div>
                 </div>
               </TabsContent>
+
+              
               <TabsContent value="history">
                 <div className="space-y-4">
                   <div className="p-4 border rounded-md bg-card">
@@ -126,7 +133,7 @@ export default function ProductComparison({ product }) {
               </TabsContent>
             </Tabs>
             <div>
-              <h3 className="text-lg font-medium mb-2">Description</h3>
+              <h3 className="mb-2 text-lg font-medium">Description</h3>
               <p className="text-muted-foreground">{product.description}</p>
             </div>
           </div>
@@ -134,11 +141,11 @@ export default function ProductComparison({ product }) {
       </CardContent>
       <CardFooter className="flex items-center justify-between">
         <Button variant="outline">Set Price Alert</Button>
-        <Button>
+        {/* <Button>
           <Link href={`/products?search=${encodeURIComponent(product.name)}`} className="flex items-center">
             View Full Details
           </Link>
-        </Button>
+        </Button> */}
       </CardFooter>
     </Card>
   )

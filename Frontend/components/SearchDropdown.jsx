@@ -98,6 +98,8 @@ export default function SearchDropdown({ value, onChange }) {
     <div className="relative w-full" ref={dropdownRef}>
       <div className="relative">
         <Search className="absolute w-4 h-4 -translate-y-1/2 left-3 top-1/2 text-muted-foreground" />
+
+        
         <Input
           ref={inputRef}
           type="text"
@@ -107,6 +109,10 @@ export default function SearchDropdown({ value, onChange }) {
           onKeyDown={handleKeyDown}
           className="pl-9 pr-9"
         />
+
+
+
+        
         {value && (
           <button
             onClick={clearSearch}
@@ -131,7 +137,7 @@ export default function SearchDropdown({ value, onChange }) {
                 <div className="flex items-center justify-between">
                   <span className="font-medium">{result.name}</span>
                   <span className="text-sm text-muted-foreground">
-                    ${result.lowestPrice?.toFixed(2) || "N/A"}
+                    Rs.{result.lowestPrice?.toFixed(2) || "N/A"}
                   </span>
                 </div>
               </li>
