@@ -4,7 +4,7 @@ const cors = require('cors');
 const app = express();
 const port = 5000;
 
-app.use(cors({ origin: "http://localhost:3000" }));
+app.use(cors({ origin: "http://localhost:5173" }));
 
 app.get("/products", (req, res) => {
     const products = [
@@ -220,6 +220,16 @@ app.get("/alerts", (req, res) => {
   res.json(alerts);
 })
 
+
+app.get("/signup" , (req,res) => {
+  
+  if(req.query.email && req.query.password){
+    console.log(req.query.email, req.query.password);
+    res.json({message: "User created successfully"});
+  }else{
+    res.status(400).json({message: "Invalid email or password"});
+  }
+})
 app.listen(port, (req,res) =>
 {
     console.log(`Server is running on http://localhost:${port}`);
