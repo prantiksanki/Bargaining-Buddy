@@ -23,6 +23,9 @@ const AlertDropdown = () => {
         <div className="p-4 text-gray-300 text-sm">No alerts yet.</div>
       ) : (
         <ul className="divide-y divide-gray-700">
+
+
+          
           {products.map((product, index) => (
             <li
               key={product.id}

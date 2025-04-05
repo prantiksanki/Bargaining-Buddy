@@ -6,11 +6,13 @@ const HeroSection = () => {
   const [products, setProducts] = useState([]);
   const [filtered, setFiltered] = useState([]);
 
+  // Fetch products from backend
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch('https://fakestoreapi.com/products');
+        const res = await fetch('http://localhost:5000/products');
         const data = await res.json();
+        console.log('Fetched products:', data);
         setProducts(data);
       } catch (err) {
         console.error('API fetch error:', err);
@@ -19,12 +21,13 @@ const HeroSection = () => {
     fetchProducts();
   }, []);
 
+  // Filter products based on search query
   useEffect(() => {
     if (query.trim() === '') {
       setFiltered([]);
     } else {
       const matches = products.filter((product) =>
-        product.title.toLowerCase().includes(query.toLowerCase())
+        (product?.title || product?.name || '').toLowerCase().includes(query.toLowerCase())
       );
       setFiltered(matches);
     }
@@ -55,21 +58,21 @@ const HeroSection = () => {
 
           {/* Dropdown */}
           {filtered.length > 0 && (
-            <ul className="absolute z-10 bg-[#0f172a] text-white w-full mt-2 rounded-md shadow-lg max-h-60 overflow-y-auto border border-gray-700">
+            <ul className="absolute z-50 bg-[#0f172a] text-white w-full mt-2 rounded-md shadow-lg max-h-60 overflow-y-auto border border-gray-700">
               {filtered.map((item, index) => (
                 <li
-                  key={item.id}
+                  key={item.id || index}
                   className={`px-4 py-2 cursor-pointer transition-colors ${
                     index % 2 === 0
                       ? 'bg-[#0f172a] hover:bg-[#1f2937]'
                       : 'bg-[#1a2332] hover:bg-[#2a3444]'
                   }`}
                   onClick={() => {
-                    setQuery(item.title);
+                    setQuery(item.title || item.name);
                     setFiltered([]);
                   }}
                 >
-                  {item.title}
+                  {item.title || item.name}
                 </li>
               ))}
             </ul>
