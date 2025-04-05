@@ -7,7 +7,6 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata = {
   title: "BargainBuddy - Compare Prices & Save Money",
   description: "Find the best deals across multiple retailers and save money on your purchases.",
-  generator: 'v0.dev'
 }
 
 export default function RootLayout({ children }) {

@@ -181,6 +181,39 @@ app.get("/alerts", (req, res) => {
       inStock: true,
       retailer: "Amazon",
       
+    },
+    {
+      id: "2",
+      name: "Sony WH-1000XM4 Wireless Noise Cancelling Headphones",
+      price: 999.0,
+      lowPrice: 900.0,
+      highPrice: 1000.0,
+      currentPrice: 950.0,
+      url: "#",
+      inStock: true,
+      retailer: "Amazon",
+    },
+    {
+      id: "3",
+      name: "Lenovo ThinkPad X1 Carbon",
+      price: 999.0,
+      lowPrice: 900.0,
+      highPrice: 1000.0,
+      currentPrice: 950.0,
+      url: "#",
+      inStock: true,
+      retailer: "Amazon",
+    },
+    {
+      id: "4",
+      name: "HP Pavilion 15.6 inch Laptop",
+      price: 999.0,
+      lowPrice: 900.0,
+      highPrice: 1000.0,
+      currentPrice: 950.0,
+      url: "#",
+      inStock: true,
+      retailer: "Amazon",
     }
   ] 
 

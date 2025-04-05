@@ -1,5 +1,5 @@
 "use client"
-import { Suspense, useState } from "react"
+import { Suspense, useState , useRef} from "react"
 import Link from "next/link"
 import { Search } from "lucide-react"
 
@@ -9,10 +9,12 @@ import PopularComparisons from "../components/popular-comparisons"
 import SearchResults from "../components/search-results"
 import { Skeleton } from "../components/ui/skeleton"
 import { ThemeToggle } from "../components/theme-toggle"
+import AlertDropdown from "../components/alert-dropdown"
 
 export default function HomePage() {
   const [searchTerm, setSearchTerm] = useState("")
-  
+  const dropdownRef = useRef()
+
   
   return (
     <div className="flex flex-col min-h-screen">
@@ -29,12 +31,44 @@ export default function HomePage() {
               >
                 Deals
               </Link>
-              <Link
-                href="/alerts"
-                className="text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
-              >
+
+
+              
+                            
+              {/* <div className="relative group">
+                <button>
                 Price Alerts
-              </Link>
+                </button>
+              <div className="absolute left-0 z-50 hidden mt-2 group-hover:block top-full">
+            <AlertDropdown />
+           </div>
+           </div> */}
+
+<div
+      className="relative"
+    >
+      <button
+        className="px-4 py-2 text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
+        onClick={() => {
+          console.log("Button clicked");
+          dropdownRef.current?.toggleVisibility();
+          dropdownRef.current?.loadAlerts();
+        }}
+      >
+        Price Alerts
+      </button>
+
+      <div className="absolute left-0 z-50 w-64 mt-2">
+        <AlertDropdown ref={dropdownRef} />
+      </div>
+    </div>
+           
+
+
+
+
+
+           
               <Link
                 href="/history"
                 className="text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
@@ -70,11 +104,16 @@ export default function HomePage() {
                 <div className="flex flex-col gap-4 min-[400px]:flex-row">
                   <div className="relative flex-1 w-full">
                     
+
+                    
                     <SearchDropdown 
                       value={searchTerm}
                       onChange={setSearchTerm}
                     />
                   </div>
+
+
+                  
                   
                   <Button type="submit" className="min-[400px]:w-auto ">Search</Button>
                 </div>
