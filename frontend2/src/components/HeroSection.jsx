@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const HeroSection = () => {
   const [query, setQuery] = useState('');
   const [products, setProducts] = useState([]);
   const [filtered, setFiltered] = useState([]);
+  const navigate = useNavigate();
 
-  // Fetch products from backend
+  // Fetch products on mount
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const res = await fetch('http://localhost:5000/products');
         const data = await res.json();
-        console.log('Fetched products:', data);
         setProducts(data);
       } catch (err) {
         console.error('API fetch error:', err);
@@ -21,7 +22,7 @@ const HeroSection = () => {
     fetchProducts();
   }, []);
 
-  // Filter products based on search query
+  // Filter products based on input query
   useEffect(() => {
     if (query.trim() === '') {
       setFiltered([]);
@@ -33,19 +34,25 @@ const HeroSection = () => {
     }
   }, [query, products]);
 
+  const handleProductClick = (name) => {
+    setQuery(name);
+    setFiltered([]);
+    navigate(`/comparison?search=${encodeURIComponent(name)}`);
+  };
+
   return (
     <section className="flex flex-col items-center justify-center text-center px-4 py-16 bg-[#1f2937] text-white min-h-[70vh]">
-      <h1 className="text-5xl md:text-6xl font-bold mb-4">
+      <h1 className="mb-4 text-5xl font-bold md:text-6xl">
         Find the Best Deals Across the Web
       </h1>
-      <p className="text-lg md:text-xl text-gray-300 mb-8">
+      <p className="mb-8 text-lg text-gray-300 md:text-xl">
         Compare prices from multiple retailers and save money on your purchases.
       </p>
 
       {/* Search Bar */}
-      <div className="relative flex items-start gap-2 w-full max-w-2xl">
+      <div className="relative flex items-start w-full max-w-2xl gap-2">
         <div className="relative flex-grow">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+          <span className="absolute text-gray-400 -translate-y-1/2 left-3 top-1/2">
             <Search size={18} />
           </span>
           <input
@@ -67,10 +74,7 @@ const HeroSection = () => {
                       ? 'bg-[#0f172a] hover:bg-[#1f2937]'
                       : 'bg-[#1a2332] hover:bg-[#2a3444]'
                   }`}
-                  onClick={() => {
-                    setQuery(item.title || item.name);
-                    setFiltered([]);
-                  }}
+                  onClick={() => handleProductClick(item.title || item.name)}
                 >
                   {item.title || item.name}
                 </li>
@@ -79,17 +83,24 @@ const HeroSection = () => {
           )}
         </div>
 
-        <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">
+        <button
+          className="px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600"
+          onClick={() => {
+            if (query.trim()) {
+              navigate(`/comparison?search=${encodeURIComponent(query)}`);
+            }
+          }}
+        >
           Search
         </button>
       </div>
 
       {/* Category Buttons */}
-      <div className="mt-8 flex flex-wrap gap-4 justify-center">
+      <div className="flex flex-wrap justify-center gap-4 mt-8">
         {['Electronics', 'Fashion', 'Home & Kitchen', 'Beauty'].map((cat) => (
           <button
             key={cat}
-            className="bg-black text-white font-semibold px-4 py-2 rounded-md hover:bg-gray-800 transition"
+            className="px-4 py-2 font-semibold text-white transition bg-black rounded-md hover:bg-gray-800"
           >
             {cat}
           </button>

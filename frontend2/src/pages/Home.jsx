@@ -6,7 +6,7 @@ import {RecentSearches} from '../components'
 import {Footer} from '../components'
 export default function Home() {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="flex flex-col min-h-screen">
         <NavBar />
   
         <div className="flex-1">

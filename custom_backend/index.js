@@ -3,6 +3,9 @@ const cors = require('cors');
 
 const app = express();
 const port = 5000;
+app.use(express.json()); // for parsing application/json
+app.use(express.urlencoded({ extended: true })); // for parsing form data
+
 
 app.use(cors({ origin: "http://localhost:5173" }));
 
@@ -170,7 +173,7 @@ app.get("/products/popular", (req, res) => {
 
 app.get("/alerts", (req, res) => {
   const alerts = [
-    {
+{
       id: "1",
       name: "Apple iPhone 15 Pro",
       price: 999.0,
@@ -221,14 +224,95 @@ app.get("/alerts", (req, res) => {
 })
 
 
-app.get("/signup" , (req,res) => {
+app.post("/signup", (req, res) => {
+  const { email, password , name, agreeToTerms , confirmPassword} = req.body;
   
-  if(req.query.email && req.query.password){
+  if (email && password && name && agreeToTerms, confirmPassword) {
+    console.log(email, password, name, agreeToTerms, confirmPassword);
+    res.json({ message: "User created successfully" });
+  } 
+  else 
+  {
+    res.status(400).json({ message: "Invalid email or password" });
+  }
+});
+
+
+app.post("/login" , (req,res)=>
+{
+  if(req.body.email && req.body.password && req.body.rememberMe)
+  {
     console.log(req.query.email, req.query.password);
-    res.json({message: "User created successfully"});
-  }else{
+    res.json({message: "User logged in successfully"});
+  }
+  else
+  {
     res.status(400).json({message: "Invalid email or password"});
   }
+})
+
+
+app.get("/popular" , (req,res)=>
+{
+  const popularProducts = [
+    {
+      id: "1",
+      name: "Apple iPhone 15 Pro",
+      image: "https://www.iphoned.nl/wp-content/uploads/2023/02/iphone-16-ultra.jpg?height=300&width=300",
+      price: 999.0,
+      lowPrice: 900.0,
+      highPrice: 1000.0,
+      currentPrice: 950.0,
+      url: "#",
+      inStock: true,
+      retailer: "Amazon",
+      category: "Electronics",
+      description: "Industry-leading noise cancellation with Dual Noise Sensor technology",
+    },
+    {
+      id: "2",
+      name: "Sony WH-1000XM4 Wireless Noise Cancelling Headphones",
+      image: "https://www.bhphotovideo.com/images/images2500x2500/sony_wh1000xm4_s_wh_1000xm4_wireless_noise_canceling_over_ear_1582976.jpg?height=300&width=300",
+      price: 999.0,
+      lowPrice: 900.0,
+      highPrice: 1000.0,
+      currentPrice: 950.0,
+      url: "#",
+      inStock: true,
+      retailer: "Amazon",
+      category: "Electronics",
+      description: "Industry-leading noise cancellation with Dual Noise Sensor technology",
+    },
+    {
+      id: "3",
+      name: "Lenovo ThinkPad X1 Carbon",
+      image: "https://www.club386.com/wp-content/uploads/2022/05/Lenovo-ThinkPad-P16.jpg?height=300&width=300",
+      price: 999.0,
+      lowPrice: 900.0,
+      highPrice: 1000.0,
+      currentPrice: 950.0,
+      url: "#",
+      inStock: true,
+      retailer: "Amazon",
+      category: "Electronics",
+      description: "Industry-leading noise cancellation with Dual Noise Sensor technology",
+    },
+    {
+      id: "4",
+      name: "HP Pavilion 15.6 inch Laptop",
+      image: "https://www.startech.com.bd/image/cache/catalog/laptop/hp-laptop/15-cs3051tx/15-cs3051tx-4-500x500.jpg?height=300&width=300",
+      price: 999.0,
+      lowPrice: 900.0,
+      highPrice: 1000.0,
+      currentPrice: 950.0,
+      url: "#",
+      inStock: true,
+      retailer: "Amazon",
+      category: "Electronics",
+      description: "Industry-leading noise cancellation with Dual Noise Sensor technology",
+    }
+  ] 
+  res.json(popularProducts);
 })
 app.listen(port, (req,res) =>
 {
