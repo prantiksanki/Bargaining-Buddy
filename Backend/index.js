@@ -6,7 +6,6 @@ const cors = require("cors");
 // Import Routes
 const websiteRoutes = require("./routes/websiteRoutes");
 const productRoutes = require("./routes/productRoutes");
-const userRoutes = require("./routes/userRoutes");
 const priceHistoryRoutes = require("./routes/priceHistoryRoutes");
 const scraperRoutes = require("./routes/scraperRoutes.js");  
 
@@ -18,22 +17,21 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({ origin: "http://localhost:5173" }));
 
 // Routes
-app.use("/api/websites", websiteRoutes);
-app.use("/api/products", productRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/price-history", priceHistoryRoutes);
-app.use("/api", scraperRoutes); // Scraper route
+app.use("/websites", websiteRoutes);
+app.use("/products", productRoutes);
+app.use("/price-history", priceHistoryRoutes);
+app.use("/", scraperRoutes); // Scraper route
 // Connect to MongoDB
 mongoose
-  .connect(process.env.MONGO_URI, {
+  .connect(process.env.MONGO_URI || "mongodb://localhost:27017/bargainbuddy", {
     useNewUrlParser: true,
     useUnifiedTopology: true
   })
   .then(() => { 
-    console.log(`Connected to MongoDB API at ${process.env.MONGO_URI} | ${new Date()}`)
+    console.log(`Connected to MongoDB API at ${process.env.MONGO_URI || "mongodb://localhost:27017/bargainbuddy"} | ${new Date().toLocaleString()}`);
   })
   .catch((err) => console.error("❌ MongoDB Connection Error:", err));
 
