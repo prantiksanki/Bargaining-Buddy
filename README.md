@@ -36,7 +36,7 @@ This project is part of our Software Engineering capstone at UPES.
 
 | Layer        | Technology                                |
 |--------------|-------------------------------------------|
-| Frontend     | HTML, CSS, JavaScript (React planned)     |
+| Frontend     | React.js                                  |
 | Backend      | Node.js, Express.js (CommonJS syntax)     |
 | Web Scraping | Puppeteer, puppeteer-extra stealth plugin |
 | Database     | MongoDB                                   |
