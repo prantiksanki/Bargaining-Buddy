@@ -10,7 +10,7 @@ exports.getPriceHistory = async (req, res) => {
     }
 };
 
-// Add a price record
+
 exports.addPriceRecord = async (req, res) => {
     try {
         const newPriceRecord = new PriceHistory(req.body);
