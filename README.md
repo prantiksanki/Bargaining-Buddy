@@ -112,7 +112,7 @@ Backend/
 | Project Manager              | Aantriksh Sood     | @ZeroDiscord       |
 | Frontend Developer           | Prantik Sanki      | @prantiksanki      |
 | Machine Learning Engineer    | Saksham Bhardwaj   | (TBD)              |
-| Documentation & DB Engineer  | Sanyam Goyal       | (TBD)              |
+| Documentation & DB Engineer  | Sanyam Goyal       | @Sanyamgoyal21     |
 
 ---
 
