@@ -111,7 +111,7 @@ Backend/
 |------------------------------|--------------------|--------------------|
 | Project Manager              | Aantriksh Sood     | @ZeroDiscord       |
 | Frontend Developer           | Prantik Sanki      | @prantiksanki      |
-| Machine Learning Engineer    | Saksham Bhardwaj   | Sakshambh09        |
+| Machine Learning Engineer    | Saksham Bhardwaj   | @Sakshambh09       |
 | Documentation & DB Engineer  | Sanyam Goyal       | @Sanyamgoyal21     |
 
 ---
