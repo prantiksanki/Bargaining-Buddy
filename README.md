@@ -107,11 +107,11 @@ Backend/
 
 ## Contributors
 
-| Role                          | Name               | GitHub Handle      |
+| Role                         | Name               | GitHub Handle     |
 |------------------------------|--------------------|--------------------|
 | Project Manager              | Aantriksh Sood     | @ZeroDiscord       |
 | Frontend Developer           | Prantik Sanki      | @prantiksanki      |
-| Machine Learning Engineer    | Saksham Bhardwaj   | (TBD)              |
+| Machine Learning Engineer    | Saksham Bhardwaj   | Sakshambh09        |
 | Documentation & DB Engineer  | Sanyam Goyal       | @Sanyamgoyal21     |
 
 ---
