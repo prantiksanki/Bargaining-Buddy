@@ -13,6 +13,20 @@ async function searchProducts(query) {
 
   await page.goto(`https://www.xerve.in/prices?q=${encodedQuery}`, { waitUntil: "domcontentloaded" });
 
+
+  const recaptchaButton = await page.$(".g-recaptcha");
+  if (recaptchaButton) {
+    await page.reload({ waitUntil: "domcontentloaded" });
+  } else {
+
+    const startButton = await page.$x("//button[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'start')]");
+    if (startButton.length > 0) {
+      await startButton[0].click();
+      await page.reload({ waitUntil: "domcontentloaded" });
+    }
+  }
+
+
   const products = await page.evaluate(() => {
     const quoteNodes = document.querySelectorAll("._tile_container");
     const imgNodes = document.querySelectorAll(".St-Img-M img");
@@ -112,7 +126,6 @@ async function scrapeProductById(productId) {
     const averagePrice = (numericPrices.reduce((sum, val) => sum + val, 0) / numericPrices.length).toFixed(2);
 
     return {
-      id: productId,
       name: productTitle,
       image: productImageURL,
       size: productSize,
