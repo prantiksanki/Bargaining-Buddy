@@ -4,30 +4,31 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "dev": "vite", // Starts the local development server
+    "build": "vite build", // Builds the app for production
+    "lint": "eslint .", // Lints all files in the project
+    "preview": "vite preview" // Serves the production build for previewing
+  },
   },
   "dependencies": {
-    "cors": "^2.8.5",
-    "lucide-react": "^0.487.0",
+    "cors": "^2.8.5",// May be used for local API proxying
+    "lucide-react": "^0.487.0", // Icon library for React
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.5.0"
+    "react-router-dom": "^7.5.0"// Handles frontend routing
   },
   "devDependencies": {
-    "@eslint/js": "^9.21.0",
-    "@types/react": "^19.0.10",
-    "@types/react-dom": "^19.0.4",
-    "@vitejs/plugin-react": "^4.3.4",
-    "autoprefixer": "^10.4.21",
-    "eslint": "^9.21.0",
-    "eslint-plugin-react-hooks": "^5.1.0",
-    "eslint-plugin-react-refresh": "^0.4.19",
-    "globals": "^15.15.0",
-    "postcss": "^8.5.3",
-    "tailwindcss": "^3.4.17",
-    "vite": "^6.2.0"
+    "@eslint/js": "^9.21.0",// ESLint base configuration
+    "@types/react": "^19.0.10",// React types for TypeScript (not yet installed)
+    "@types/react-dom": "^19.0.4", 
+    "@vitejs/plugin-react": "^4.3.4",// Vite plugin for React fast refresh, etc.
+    "autoprefixer": "^10.4.21",// Adds vendor prefixes to CSS
+    "eslint": "^9.21.0",// Linter for JavaScript and JSX
+    "eslint-plugin-react-hooks": "^5.1.0",// Lints rules of hooks
+    "eslint-plugin-react-refresh": "^0.4.19",// Helps detect issues in hot module reloading
+    "globals": "^15.15.0",// Used with ESLint to define global variables
+    "postcss": "^8.5.3",// Required by Tailwind CSS
+    "tailwindcss": "^3.4.17",// Utility-first CSS framework
+    "vite": "^6.2.0"// Lightning fast build tool
   }
 }
