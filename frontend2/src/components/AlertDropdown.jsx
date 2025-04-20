@@ -20,7 +20,7 @@ const AlertDropdown = () => {
   return (
     <div className="w-72 max-h-80 overflow-y-auto rounded-md shadow-lg bg-[#0f172a] ring-1 ring-black ring-opacity-5 z-50">
       {products.length === 0 ? (
-        <div className="p-4 text-gray-300 text-sm">No alerts yet.</div>
+        <div className="p-4 text-sm text-gray-300">No alerts yet.</div>
       ) : (
         <ul className="divide-y divide-gray-700">
 
@@ -37,8 +37,8 @@ const AlertDropdown = () => {
               <div className="font-semibold text-white truncate">
                 {product.name}
               </div>
-              <div className="text-gray-400">${product.price}</div>
-              <div className="text-gray-500 text-xs">{product.retailer}</div>
+              <div className="text-gray-400">Rs. {product.price}</div>
+              <div className="text-xs text-gray-500">{product.retailer}</div>
             </li>
           ))}
         </ul>

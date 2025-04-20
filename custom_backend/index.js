@@ -110,7 +110,7 @@ app.get("/products", (req, res) => {
       {
         id: "5",
         name: "Lenovo 1380",
-        image: "https://pisces.bbystatic.com/image2/BestBuy_US/images/products/6511/6511947ld.jpg",
+        image: "https://www.iphoned.nl/wp-content/uploads/2023/02/iphone-16-ultra.jpg?height=300&width=300",
         description: "Industry-leading noise cancellation with Dual Noise Sensor technology",
         category: "Electronics",
         prices: [
