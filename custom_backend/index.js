@@ -58,10 +58,92 @@ app.get("/products", (req, res) => {
           { date: "May", amazon: 299, bestbuy: 299, walmart: 299, target: 299 },
           { date: "Jun", amazon: 278, bestbuy: 299, walmart: 289, target: 299 },
         ],
+      },
+      {
+        id: "3",
+        name: "Samsung Phone",
+        image: "https://pisces.bbystatic.com/image2/BestBuy_US/images/products/6441/6441107_sd.jpg",
+        description: "Industry-leading noise cancellation with Dual Noise Sensor technology",
+        category: "Electronics",
+        prices: [
+          { retailer: "Amazon", price: 278.0, url: "#", inStock: true },
+          { retailer: "Best Buy", price: 299.99, url: "#", inStock: true },
+          { retailer: "Walmart", price: 289.0, url: "#", inStock: false },
+          { retailer: "Target", price: 299.99, url: "#", inStock: true },
+        ],
+        lowestPrice: 278.0,
+        highestPrice: 349.99,
+        averagePrice: 298.0,
+        priceHistory: [
+          { date: "Jan", amazon: 349, bestbuy: 349, walmart: 349, target: 349 },
+          { date: "Feb", amazon: 329, bestbuy: 349, walmart: 339, target: 349 },
+          { date: "Mar", amazon: 329, bestbuy: 329, walmart: 329, target: 329 },
+          { date: "Apr", amazon: 299, bestbuy: 329, walmart: 319, target: 329 },
+          { date: "May", amazon: 299, bestbuy: 299, walmart: 299, target: 299 },
+          { date: "Jun", amazon: 278, bestbuy: 299, walmart: 289, target: 299 },
+        ],
+      },
+      {
+        id: "4",
+        name: "Oneplus Buds 3",
+        image: "https://th.bing.com/th/id/OIP.Ajl2bgWavnfvrWxFcrVL9AAAAA?rs=1&pid=ImgDetMain",
+        description: "Industry-leading noise cancellation with Dual Noise Sensor technology",
+        category: "Electronics",
+        prices: [
+          { retailer: "Amazon", price: 278.0, url: "#", inStock: true },
+          { retailer: "Best Buy", price: 299.99, url: "#", inStock: true },
+          { retailer: "Walmart", price: 289.0, url: "#", inStock: false },
+          { retailer: "Target", price: 299.99, url: "#", inStock: true },
+        ],
+        lowestPrice: 278.0,
+        highestPrice: 349.99,
+        averagePrice: 298.0,
+        priceHistory: [
+          { date: "Jan", amazon: 349, bestbuy: 349, walmart: 349, target: 349 },
+          { date: "Feb", amazon: 329, bestbuy: 349, walmart: 339, target: 349 },
+          { date: "Mar", amazon: 329, bestbuy: 329, walmart: 329, target: 329 },
+          { date: "Apr", amazon: 299, bestbuy: 329, walmart: 319, target: 329 },
+          { date: "May", amazon: 299, bestbuy: 299, walmart: 299, target: 299 },
+          { date: "Jun", amazon: 278, bestbuy: 299, walmart: 289, target: 299 },
+        ],
+      },
+      {
+        id: "5",
+        name: "Lenovo 1380",
+        image: "https://pisces.bbystatic.com/image2/BestBuy_US/images/products/6511/6511947ld.jpg",
+        description: "Industry-leading noise cancellation with Dual Noise Sensor technology",
+        category: "Electronics",
+        prices: [
+          { retailer: "Amazon", price: 278.0, url: "#", inStock: true },
+          { retailer: "Best Buy", price: 299.99, url: "#", inStock: true },
+          { retailer: "Walmart", price: 289.0, url: "#", inStock: false },
+          { retailer: "Target", price: 299.99, url: "#", inStock: true },
+        ],
+        lowestPrice: 278.0,
+        highestPrice: 349.99,
+        averagePrice: 298.0,
+        priceHistory: [
+          { date: "Jan", amazon: 349, bestbuy: 349, walmart: 349, target: 349 },
+          { date: "Feb", amazon: 329, bestbuy: 349, walmart: 339, target: 349 },
+          { date: "Mar", amazon: 329, bestbuy: 329, walmart: 329, target: 329 },
+          { date: "Apr", amazon: 299, bestbuy: 329, walmart: 319, target: 329 },
+          { date: "May", amazon: 299, bestbuy: 299, walmart: 299, target: 299 },
+          { date: "Jun", amazon: 278, bestbuy: 299, walmart: 289, target: 299 },
+        ],
       }
     ];
 
     if (req.query.search) {
+      const filteredProducts = products.filter(product =>
+        product.id.includes(req.query.search)
+      );
+      res.json(filteredProducts);
+    } else {
+      res.json(products);
+    }
+
+
+    if (req.query.name) {
       const searchTerm = req.query.search.toLowerCase();
       const filteredProducts = products.filter(product =>
         product.name.toLowerCase().includes(searchTerm)
