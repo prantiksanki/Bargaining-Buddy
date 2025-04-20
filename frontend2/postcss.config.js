@@ -1,6 +1,6 @@
 export default {
-  plugins: {
+  plugins: { // Tailwind CSS plugin to enable utility-first styling
     tailwindcss: {},
-    autoprefixer: {},
+    autoprefixer: {}, // Autoprefixer automatically adds vendor prefixes for wider browser compatibility
   },
 }

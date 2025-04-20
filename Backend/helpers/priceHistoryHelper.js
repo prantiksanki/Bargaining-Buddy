@@ -8,9 +8,9 @@ exports.getPriceHistory = async (req, res) => {
     } catch (err) {
         res.status(500).json({ message: "Server Error" });
     }
-};
+}
 
-// Add a price record
+// Add a price for a product
 exports.addPriceRecord = async (req, res) => {
     try {
         const newPriceRecord = new PriceHistory(req.body);
