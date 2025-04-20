@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ExternalLink } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 
 const ProductPage = ({ searchQuery }) => {
   const location = useLocation();

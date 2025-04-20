@@ -6,6 +6,7 @@ import Footer from './Footer'
 import ProductDetails from './ProductDetails'
 import BargainBuddyAuth from './BargainBuddyAuth'
 // import AlertDropdown from './AlertDropdown'
+import SearchResult from './SearchResult'
 
 export {
     NavBar,
@@ -16,4 +17,5 @@ export {
     ProductDetails,
     BargainBuddyAuth, 
     // AlertDropdown,
+    SearchResult
 }

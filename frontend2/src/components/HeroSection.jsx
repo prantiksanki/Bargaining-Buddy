@@ -34,11 +34,11 @@ const HeroSection = () => {
     }
   }, [query, products]);
 
-  const handleProductClick = (name) => {
-    setQuery(name);
-    setFiltered([]);
-    navigate(`/comparison?search=${encodeURIComponent(name)}`);
-  };
+  // const handleProductClick = (name) => {
+  //   setQuery(name);
+  //   setFiltered([]);
+  //   navigate(`/comparison?search=${encodeURIComponent(name)}`);
+  // };
 
   return (
     <section className="flex flex-col items-center justify-center text-center px-4 py-16 bg-[#1f2937] text-white min-h-[70vh]">
@@ -64,7 +64,7 @@ const HeroSection = () => {
           />
 
           {/* Dropdown */}
-          {filtered.length > 0 && (
+          {/* {filtered.length > 0 && (
             <ul className="absolute z-50 bg-[#0f172a] text-white w-full mt-2 rounded-md shadow-lg max-h-60 overflow-y-auto border border-gray-700">
               {filtered.map((item, index) => (
                 <li
@@ -80,14 +80,14 @@ const HeroSection = () => {
                 </li>
               ))}
             </ul>
-          )}
+          )} */}
         </div>
 
         <button
           className="px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600"
           onClick={() => {
             if (query.trim()) {
-              navigate(`/comparison?search=${encodeURIComponent(query)}`);
+              navigate(`/result/${query}`);
             }
           }}
         >
