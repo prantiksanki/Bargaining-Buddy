@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ExternalLink } from 'lucide-react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 const ProductPage = ({ searchQuery }) => {
   const location = useLocation();
@@ -10,9 +10,10 @@ const ProductPage = ({ searchQuery }) => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/products?search=${query}`);
+        console.log(query);
+        const res = await fetch(`http://localhost:5000/scrape?id=${query}`);
         const data = await res.json();
-        setProducts(data); // now handles an array of products
+        setProducts(Array.isArray(data) ? data : [data]);
       } catch (err) {
         console.error('Error fetching product:', err);
       }
@@ -26,7 +27,7 @@ const ProductPage = ({ searchQuery }) => {
   if (!products.length) {
     return (
       <div className="min-h-screen p-8 text-white bg-gray-900">
-        <h1 className="p-4 text-sm text-gray-300">No matching items found.</h1>
+        <h1 className="p-4 text-sm text-gray-300">Loading...</h1>
       </div>
     );
   }
@@ -35,26 +36,29 @@ const ProductPage = ({ searchQuery }) => {
     <div className="min-h-screen p-8 space-y-12 text-white bg-gray-900">
       {products.map((product, index) => (
         <div
-          key={product.id}
+          key={index}
           className={`max-w-7xl mx-auto rounded-xl p-6 shadow-md ${
             index % 2 === 0 ? 'bg-[#0f172a]' : 'bg-[#1a2332]'
           }`}
         >
           <h1 className="mb-1 text-3xl font-bold">{product.name}</h1>
-          <p className="mb-6 text-gray-400">{product.category}</p>
-
+          <p className="mb-2 text-gray-400">{product.category}</p>
+          <p className="mb-4 text-gray-400">Size: {product.size}</p>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-            {/* Product Image and Price */}
+            {/* Product Image and Price Range */}
             <div>
               <img
                 src={product.image}
                 alt={product.name}
                 className="mb-4 rounded-lg"
               />
-              <p className="text-xl font-semibold">
+              <p className="text-xl font-semibold mb-2">
                 Rs. {product.lowestPrice} - Rs. {product.highestPrice}
               </p>
-              <button className="px-4 py-2 mt-4 text-white bg-blue-600 rounded hover:bg-blue-700">
+              <p className="text-lg font-medium mb-4">
+                Average Price: Rs. {product.averagePrice}
+              </p>
+              <button className="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700">
                 Set Price Alert
               </button>
             </div>
@@ -73,6 +77,9 @@ const ProductPage = ({ searchQuery }) => {
                   >
                     <div>
                       <p className="font-medium">{item.retailer}</p>
+                      <p className="text-sm">
+                        MRP: Rs. {item.mrp} | Discount: {item.discount}
+                      </p>
                       <p
                         className={`text-sm ${
                           item.inStock ? 'text-green-400' : 'text-red-400'
@@ -98,12 +105,7 @@ const ProductPage = ({ searchQuery }) => {
               </div>
             </div>
           </div>
-
-          {/* Description */}
-          <div className="mt-10">
-            <h2 className="mb-2 text-xl font-semibold">Description</h2>
-            <p className="text-gray-400">{product.description}</p>
-          </div>
+          {/* Optional: More product details could be added here */}
         </div>
       ))}
     </div>
@@ -111,4 +113,3 @@ const ProductPage = ({ searchQuery }) => {
 };
 
 export default ProductPage;
-

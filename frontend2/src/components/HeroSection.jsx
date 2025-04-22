@@ -8,11 +8,11 @@ const HeroSection = () => {
   const [filtered, setFiltered] = useState([]);
   const navigate = useNavigate();
 
-  // Fetch products on mount
+  // Fetch products on mount for recent searches
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch('http://localhost:5000/products');
+        const res = await fetch('http://localhost:5000/product/recent-searches'); // Adjusted route
         const data = await res.json();
         setProducts(data);
       } catch (err) {
@@ -33,12 +33,6 @@ const HeroSection = () => {
       setFiltered(matches);
     }
   }, [query, products]);
-
-  // const handleProductClick = (name) => {
-  //   setQuery(name);
-  //   setFiltered([]);
-  //   navigate(`/comparison?search=${encodeURIComponent(name)}`);
-  // };
 
   return (
     <section className="flex flex-col items-center justify-center text-center px-4 py-16 bg-[#1f2937] text-white min-h-[70vh]">
@@ -63,8 +57,8 @@ const HeroSection = () => {
             className="w-full bg-[#0f172a] text-white placeholder-gray-400 rounded-md py-2 pl-10 pr-4 focus:outline-none"
           />
 
-          {/* Dropdown */}
-          {/* {filtered.length > 0 && (
+          {/* Dropdown for filtered search results */}
+          {filtered.length > 0 && (
             <ul className="absolute z-50 bg-[#0f172a] text-white w-full mt-2 rounded-md shadow-lg max-h-60 overflow-y-auto border border-gray-700">
               {filtered.map((item, index) => (
                 <li
@@ -74,13 +68,17 @@ const HeroSection = () => {
                       ? 'bg-[#0f172a] hover:bg-[#1f2937]'
                       : 'bg-[#1a2332] hover:bg-[#2a3444]'
                   }`}
-                  onClick={() => handleProductClick(item.title || item.name)}
+                  onClick={() => {
+                    setQuery(item.title || item.name);
+                    setFiltered([]);
+                    navigate(`/comparison?search=${encodeURIComponent(item.title || item.name)}`);
+                  }}
                 >
                   {item.title || item.name}
                 </li>
               ))}
             </ul>
-          )} */}
+          )}
         </div>
 
         <button

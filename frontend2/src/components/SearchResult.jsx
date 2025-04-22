@@ -15,7 +15,7 @@ export default function SearchResult() {
         setLoading(true);
         console.log(name)
         // Replace with your actual API endpoint
-        const response = await fetch(`http://localhost:5000/products?name=${name}`);
+        const response = await fetch(`http://localhost:5000/search?q=${name}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch products');
@@ -109,36 +109,42 @@ export default function SearchResult() {
 
   return (
     <div className="min-h-screen px-4 py-8 bg-gray-900 md:px-8">
-      <h1 className="mb-8 text-3xl font-bold text-white">Search Results</h1>
+      <h1 className="mb-8 text-3xl font-bold text-white">Search Results for "{name}"</h1>
       
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {displayProducts.map((product) => (
-          <div key={product.id} className="overflow-hidden bg-gray-800 rounded-lg shadow-lg">
-            <div className="h-64 overflow-hidden">
-              <img 
-                src={product.image} 
-                alt={product.name} 
-                className="object-cover w-full h-full"
-              />
-            </div>
-            <div className="p-6">
-              <h2 className="mb-2 text-xl font-bold text-white">{product.name}</h2>
-              <span className="inline-block px-3 py-1 mb-3 text-sm font-semibold text-gray-300 bg-gray-700 rounded-full">
-                {product.category}
-              </span>
-              <p className="mb-4 text-gray-300">{product.description}</p>
-              <div className="flex items-center justify-between">
-                <span className="text-xl font-bold text-white">{product.price}</span>
-                <button
-                  onClick={() => handleViewDetails(product.id)}
-                  className="px-4 py-2 font-bold text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:shadow-outline"
-                >
-                  View Details
-                </button>
+        {displayProducts.map((product) => {
+          if (product.image.endsWith("rsz_blank_grey.jpg")) {
+            return null;
+          }
+          
+          return (
+            <div key={product.id} className="overflow-hidden bg-gray-800 rounded-lg shadow-lg">
+              <div className="h-64 overflow-hidden">
+                <img 
+                  src={product.image} 
+                  alt={product.title} 
+                  className="object-cover w-full h-full"
+                />
+              </div>
+              <div className="p-6">
+                <h2 className="mb-2 text-xl font-bold text-white">{product.title?.length > 20 ? product.title.slice(0, 20) + "..." : product.title}</h2>
+                <span className="inline-block px-3 py-1 mb-3 text-sm font-semibold text-gray-300 bg-gray-700 rounded-full">
+                  {product.category}
+                </span>
+                <p className="mb-4 text-gray-300">{product.description}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xl font-bold text-white">₹ {product.price}</span>
+                  <button
+                    onClick={() => handleViewDetails(product.id)}
+                    className="px-4 py-2 font-bold text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:shadow-outline"
+                  >
+                    View Details
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
