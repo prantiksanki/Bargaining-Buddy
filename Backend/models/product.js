@@ -14,19 +14,6 @@ const ProductSchema = new mongoose.Schema(
     type: String,
     required: true,
   },
-  brand:
-  { 
-    type: String,
-    required: true,
-
-  },
-  description: 
-  {
-    type: String,
-    required: true,
-
-  }, 
-
   image: 
   {
     type: String,
@@ -36,11 +23,6 @@ const ProductSchema = new mongoose.Schema(
   { 
     type: Number,
     required: true, 
-  },
-  lowest_price_site: 
-  { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: "Website" 
   },
   price_history: 
   [{ 

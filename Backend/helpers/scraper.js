@@ -7,7 +7,7 @@ puppeteer.use(StealthPlugin());
 const productMap = {}; // Maps internal productId -> Xerve URL
 
 async function searchProducts(query) {
-  const browser = await puppeteer.launch({ headless: true, args: ["--no-sandbox", "--disable-setuid-sandbox"] });
+  const browser = await puppeteer.launch({ headless: false, args: ["--no-sandbox", "--disable-setuid-sandbox"] });
   const page = await browser.newPage();
   const encodedQuery = encodeURIComponent(query);
 
@@ -25,31 +25,42 @@ async function searchProducts(query) {
       await page.reload({ waitUntil: "domcontentloaded" });
     }
   }
-
-
   const products = await page.evaluate(() => {
     const quoteNodes = document.querySelectorAll("._tile_container");
     const imgNodes = document.querySelectorAll(".St-Img-M img");
 
+
     return Array.from(quoteNodes).map((quote, index) => {
       const link = `https://www.xerve.in${quote.querySelector("a")?.getAttribute("href")}`;
       const title = quote.querySelector("h3")?.innerText;
+      const price = quote.querySelector("h4")?.innerText.trim().replace(/[\u200B-\u200D\uFEFF]/g, "").replace(/\s+/g, " ");
+      function inferBroadCategory(title) {
+        const lower = title.toLowerCase();
+        if (/(shirt|hoodie|jeans)/.test(lower)) return "Fashion";
+        if (/(headphone|phone|mobile|laptop)/.test(lower)) return "Electronics";
+        if (/(sofa|mug|utensil)/.test(lower)) return "Home & Kitchen";
+        if (/(makeup|lipstick|skincare)/.test(lower)) return "Beauty";
+        return "Miscellaneous";
+      }
+      const category = inferBroadCategory(title);
+      if (!category) category = "Miscellaneous";
       const src = imgNodes[index]?.getAttribute("src");
-      return { link, title, src };
-    }).filter(item => item.link && item.title && item.src);
+      return { link, title, price, category, src };
+    }).filter(item => item.link && item.title && item.src && item.price && item.category);
   });
 
-  await browser.close();
+  // await browser.close();
 
   // Map results to UUIDs
   return products.map(product => {
     const id = uuidv4();
     productMap[id] = product.link;
-    return { id, title: product.title, image: product.src };
+    return { id, title: product.title, image: product.src, price: product.price, category: product.category };
   });
 }
 
 async function scrapeProductById(productId) {
+  console.log(productId)
   const productUrl = productMap[productId];
   if (!productUrl) throw new Error("Invalid or expired product ID.");
 
@@ -57,20 +68,13 @@ async function scrapeProductById(productId) {
   const page = await browser.newPage();
 
   await page.goto(productUrl, { waitUntil: "domcontentloaded" });
+
+  setTimeout(() => {}, 3000); // Wait for 5 seconds to allow the page to load
   await page.waitForSelector(".s_mg", { timeout: 10000 });
 
   const productDetails = await page.evaluate(() => {
     const cards = document.querySelectorAll(".s_mg");
     if (!cards.length) return null;
-
-    function inferBroadCategory(title) {
-      const lower = title.toLowerCase();
-      if (/(shirt|hoodie|jeans)/.test(lower)) return "Fashion";
-      if (/(headphone|mobile|laptop)/.test(lower)) return "Electronics";
-      if (/(sofa|mug|utensil)/.test(lower)) return "Home & Kitchen";
-      if (/(makeup|lipstick|skincare)/.test(lower)) return "Beauty";
-      return "Miscellaneous";
-    }
 
     const prices = [];
     let productTitle = "N/A";
@@ -124,6 +128,16 @@ async function scrapeProductById(productId) {
     const lowestPrice = Math.min(...numericPrices);
     const highestPrice = Math.max(...numericPrices);
     const averagePrice = (numericPrices.reduce((sum, val) => sum + val, 0) / numericPrices.length).toFixed(2);
+    console.log(lowestPrice, highestPrice, averagePrice)
+
+    function inferBroadCategory(title) {
+  const lower = title.toLowerCase();
+  if (/(shirt|hoodie|jeans)/.test(lower)) return "Fashion";
+  if (/(headphone|phone|mobile|laptop)/.test(lower)) return "Electronics";
+  if (/(sofa|mug|utensil)/.test(lower)) return "Home & Kitchen";
+  if (/(makeup|lipstick|skincare)/.test(lower)) return "Beauty";
+  return "Miscellaneous";
+}
 
     return {
       name: productTitle,
@@ -141,5 +155,4 @@ async function scrapeProductById(productId) {
   await browser.close();
   return productDetails;
 }
-
 module.exports = { searchProducts, scrapeProductById };

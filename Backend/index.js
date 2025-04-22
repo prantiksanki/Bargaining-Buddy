@@ -4,7 +4,6 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 
 // Import Routes
-const websiteRoutes = require("./routes/websiteRoutes");
 const productRoutes = require("./routes/productRoutes");
 const priceHistoryRoutes = require("./routes/priceHistoryRoutes");
 const scraperRoutes = require("./routes/scraperRoutes.js");  
@@ -20,7 +19,6 @@ app.use(express.json());
 app.use(cors({ origin: "http://localhost:5173" }));
 
 // Routes
-app.use("/websites", websiteRoutes);
 app.use("/products", productRoutes);
 app.use("/price-history", priceHistoryRoutes);
 app.use("/", scraperRoutes); // Scraper route

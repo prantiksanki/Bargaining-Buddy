@@ -51,3 +51,15 @@ exports.deleteProduct = async (req, res) => {
         res.status(400).json({ message: "Error deleting product" });
     }
 };
+
+// Get recent searches (latest 5)
+exports.getRecentSearches = async (req, res) => {
+    try {
+      // Fetch the latest 5 recent searches and populate product details
+      const recentSearches = await RecentSearch.find().sort({ searchedAt: -1 }).limit(5).populate('productId');
+      res.json(recentSearches);
+    } catch (err) {
+      res.status(500).json({ message: 'Server Error' });
+    }
+  };
+  
