@@ -1,38 +1,28 @@
 const mongoose = require("mongoose");
 
-// product details and website reference
+const priceSchema = new mongoose.Schema({
+  retailer: String,
+  price: Number,
+  mrp: Number,
+  discount: String,
+  url: String,
+  inStock: Boolean
+});
 
-const ProductSchema = new mongoose.Schema(
-{
-  name: 
-  { 
-    type: String, 
-    required: true 
-  },
-  category: 
-  {
-    type: String,
-    required: true,
-  },
-  image: 
-  {
-    type: String,
-    default : "xxxxxxxx.jpeg"
-  },
-  lowest_price: 
-  { 
-    type: Number,
-    required: true, 
-  },
-  price_history: 
-  [{ 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: "PriceHistory" 
-  }]
-}, 
-{ timestamps: true }
-);
+const productSchema = new mongoose.Schema({
+  title: String,
+  image: String,
+  category: String,
+  prices: [priceSchema],
+  lowestPrice: Number,
+  highestPrice: Number,
+  averagePrice: Number,
+  priceHistory: [
+    {
+      date: { type: Date, default: Date.now },
+      price: Number,
+    },
+  ],
+});
 
-const productSchema = mongoose.model("Product", ProductSchema);
-
-module.exports = productSchema;
+module.exports = mongoose.model("Product", productSchema);

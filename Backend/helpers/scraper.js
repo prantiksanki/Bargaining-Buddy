@@ -7,7 +7,7 @@ puppeteer.use(StealthPlugin());
 const productMap = {}; // Maps internal productId -> Xerve URL
 
 async function searchProducts(query) {
-  const browser = await puppeteer.launch({ headless: false, args: ["--no-sandbox", "--disable-setuid-sandbox"] });
+  const browser = await puppeteer.launch({ headless: true, args: ["--no-sandbox", "--disable-setuid-sandbox"] });
   const page = await browser.newPage();
   const encodedQuery = encodeURIComponent(query);
 
@@ -99,6 +99,7 @@ async function scrapeProductById(productId) {
       const container = card.closest("._product--details") || card.parentElement;
       const rawPrice = container?.querySelector(".contentprice")?.innerText.trim() || "N/A";
       const size = container?.querySelector("span._size.active")?.innerText.trim() || "N/A";
+      let inStock = true;
       if (index === 0 && size) productSize = size;
 
       const productLink = container?.querySelector("input.alink_hide")?.value || "N/A";
@@ -114,13 +115,17 @@ async function scrapeProductById(productId) {
         discount = discountMatch ? discountMatch[1] + "%" : "N/A";
       }
 
+      if (mrp === "Not found" && discount == "N/A") {
+        inStock = false;
+      }
+
       prices.push({
         retailer: sellerName,
         price: currentPrice,
         mrp,
         discount,
         url: productLink,
-        inStock: true
+        inStock: inStock
       });
     });
 

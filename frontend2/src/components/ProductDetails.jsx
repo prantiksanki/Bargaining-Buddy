@@ -88,7 +88,7 @@ const ProductPage = ({ searchQuery }) => {
                     <div>
                       <p className="font-medium">{item.retailer}</p>
                       <p className="text-sm">
-                        MRP: Rs. {item.mrp} | Discount: {item.discount}
+                        MRP: {item.mrp == "Not found" ? "N/A" : "₹ " + item.mrp} | Discount: {item.discount}
                       </p>
                       <p
                         className={`text-sm ${
