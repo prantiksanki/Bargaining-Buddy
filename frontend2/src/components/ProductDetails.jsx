@@ -48,8 +48,18 @@ const ProductPage = ({ searchQuery }) => {
             {/* Product Image and Price Range */}
             <div>
               <img
-                src={product.image}
+                src={product.image.replace("100x100", "1100x1000")}
                 alt={product.name}
+                style={{
+                  width: 'auto',
+                  height: 'auto',
+                  border: 'none',
+                  maxWidth: '100%',
+                  pointerEvents: 'auto',
+                  maxHeight: '100%',
+                  display: 'inline-block',
+                  position: 'relative'
+                }}
                 className="mb-4 rounded-lg"
               />
               <p className="text-xl font-semibold mb-2">
