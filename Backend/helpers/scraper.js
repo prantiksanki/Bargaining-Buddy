@@ -25,7 +25,24 @@ async function searchProducts(query) {
       await page.reload({ waitUntil: "domcontentloaded" });
     }
   }
-  const products = await page.evaluate(() => {
+  let products = await page.evaluate(() => {
+    // scroll a bit to capture lazy-loaded images
+    let scrollHeight = 0;
+    let scrollStep = 100;
+    let scrollInterval = setInterval(() => {
+      window.scrollBy(0, scrollStep);
+      scrollHeight += scrollStep;
+      if (scrollHeight >= document.body.scrollHeight) {
+        clearInterval(scrollInterval);
+      }
+    }, 100);
+    // wait for lazy loading to finish
+    new Promise((resolve) => {
+      setTimeout(() => {
+        clearInterval(scrollInterval);
+        resolve(document.querySelectorAll("._tile_container"));
+      }, 2000);
+    })
     const quoteNodes = document.querySelectorAll("._tile_container");
     const imgNodes = document.querySelectorAll(".St-Img-M img");
 
@@ -44,19 +61,24 @@ async function searchProducts(query) {
       }
       const category = inferBroadCategory(title);
       if (!category) category = "Miscellaneous";
-      const src = imgNodes[index]?.getAttribute("src");
+      let src = imgNodes[index]?.getAttribute("src");
       return { link, title, price, category, src };
     }).filter(item => item.link && item.title && item.src && item.price && item.category);
   });
 
+  products = Array.from(products).filter(product => !product.src.endsWith("rsz_blank_grey.jpg"));
+  Object.keys(productMap).forEach(key => delete productMap[key]);
+
   // await browser.close();
 
   // Map results to UUIDs
+
+  console.log(products)
   return products.map(product => {
     const id = uuidv4();
     productMap[id] = product.link;
     return { id, title: product.title, image: product.src, price: product.price, category: product.category };
-  });
+  })
 }
 
 async function scrapeProductById(productId) {
