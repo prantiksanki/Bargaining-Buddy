@@ -22,7 +22,7 @@ async function runPuppeteerCode(productLink) {
     return element ? element.innerText.split('\n') : [];
   });
 
-  await browser.close();
+  // await browser.close();
   return result;
 }
 

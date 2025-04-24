@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // ✅ Import this
+import { useNavigate } from 'react-router-dom';
+import { Tag, TrendingUp, ChevronRight } from 'lucide-react';
 
 const PopularComparisons = () => {
   const [products, setProducts] = useState([]);
-  const navigate = useNavigate(); // ✅ Initialize navigate
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -18,71 +19,74 @@ const PopularComparisons = () => {
     fetchProducts();
   }, []);
 
-
-  // {
-  //   id: "4",
-  //   name: "HP Pavilion 15.6 inch Laptop",
-  //   image: "https://www.bhphotovideo.com/images/images2500x2500/sony_wh1000xm4_s_wh_1000xm4_wireless_noise_canceling_over_ear_1582976.jpg?height=300&width=300",
-  //   price: 999.0,
-  //   lowPrice: 900.0,
-  //   highPrice: 1000.0,
-  //   currentPrice: 950.0,
-  //   url: "#",
-  //   inStock: true,
-  //   retailer: "Amazon",
-  //   category: "Electronics",
-  // }
-
   return (
-    <section className="bg-[#0a0f1c] px-6 py-16 text-white">
-      <div className="max-w-6xl mx-auto">
-        <h2 className="mb-1 text-2xl font-semibold md:text-3xl">
-          Popular Comparisons
-        </h2>
-        <p className="mb-8 text-gray-400">
-          See what other shoppers are comparing right now
-        </p>
+    <section className="py-12 bg-white">
+      <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div className="text-center">
+          <div className="inline-flex items-center px-4 py-1 mb-4 text-blue-600 rounded-full bg-blue-50">
+            <TrendingUp className="w-4 h-4 mr-2" />
+            <span className="text-sm font-medium">Trending Now</span>
+          </div>
+          <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+            Popular Comparisons
+          </h2>
+          <p className="max-w-2xl mx-auto mt-3 text-xl text-gray-500">
+            See what other shoppers are comparing right now
+          </p>
+        </div>
 
         {/* Product Grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {products.map((product) => (
-            <div
-            key={product.id}
-            className="bg-[#111827] rounded-lg overflow-hidden shadow-md"
-          >
-            <img
-              src={product.image || 'https://via.placeholder.com/400x300?text=No+Image'}
-              alt={product.name || 'Product'}
-              className="object-cover w-full h-64"
-            />
-            <div className="p-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold truncate">
-                  {product.name || product.title || 'Unnamed Product'}
-                </h3>
-                <span className="px-2 py-1 text-xs text-white bg-gray-700 rounded-full">
-                  {product.category || 'Uncategorized'}
-                </span>
+        <div className="grid gap-6 mt-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {products.map((product, index) => (
+            <div 
+              key={index} 
+              className="overflow-hidden transition-shadow duration-200 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md"
+            >
+              <div className="h-48 overflow-hidden bg-gray-200">
+                <img 
+                  src={product.image || '/api/placeholder/400/320'} 
+                  alt={product.name || product.title}
+                  className="object-cover w-full h-full"
+                />
               </div>
-              <p className="mt-2 text-sm text-gray-300">
-                {product.description || 'No description available.'}
-              </p>
-              <div className="flex items-center justify-between mt-4">
-                <span className="font-semibold">Rs. {product.lowPrice || 'N/A'}</span>
-                <button
-                  className="px-3 py-1 text-sm text-white transition bg-gray-800 border border-gray-600 rounded hover:bg-gray-700"
-                  onClick={() => {
-                    const name = product.name || product.title;
-                    if (name?.trim()) {
-                      navigate(`/comparison?search=${encodeURIComponent(name.toLowerCase())}`);
-                    }
-                  }}
-                >
-                  View Details
-                </button>
+              
+              <div className="p-5">
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
+                    {product.name || product.title || 'Unnamed Product'}
+                  </h3>
+                  <span className="ml-2 flex-shrink-0 bg-blue-50 text-blue-700 text-xs px-2.5 py-0.5 rounded-full flex items-center">
+                    <Tag className="w-3 h-3 mr-1" />
+                    {product.category || 'Uncategorized'}
+                  </span>
+                </div>
+                
+                <p className="mb-4 text-sm text-gray-600 line-clamp-2">
+                  {product.description || 'No description available.'}
+                </p>
+                
+                <div className="flex items-center justify-between mt-auto">
+                  <div>
+                    <p className="text-sm text-gray-500">Price from</p>
+                    <p className="text-lg font-bold text-blue-600">
+                      ₹{product.lowPrice || 'N/A'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      const name = product.name || product.title;
+                      if (name?.trim()) {
+                        navigate(`/comparison?search=${encodeURIComponent(name.toLowerCase())}`);
+                      }
+                    }}
+                    className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    View Details
+                    <ChevronRight className="w-4 h-4 ml-1" />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
           ))}
         </div>
       </div>

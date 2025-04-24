@@ -7,7 +7,7 @@ puppeteer.use(StealthPlugin());
 const productMap = {}; // Maps internal productId -> Xerve URL
 
 async function searchProducts(query) {
-  const browser = await puppeteer.launch({ headless: true, args: ["--no-sandbox", "--disable-setuid-sandbox"] });
+  const browser = await puppeteer.launch({ headless: false, args: ["--no-sandbox", "--disable-setuid-sandbox"] });
   const page = await browser.newPage();
   const encodedQuery = encodeURIComponent(query);
 
@@ -86,7 +86,7 @@ async function scrapeProductById(productId) {
   const productUrl = productMap[productId];
   if (!productUrl) throw new Error("Invalid or expired product ID.");
 
-  const browser = await puppeteer.launch({ headless: true, args: ["--no-sandbox", "--disable-setuid-sandbox"] });
+  const browser = await puppeteer.launch({ headless: false, args: ["--no-sandbox", "--disable-setuid-sandbox"] });
   const page = await browser.newPage();
 
   await page.goto(productUrl, { waitUntil: "domcontentloaded" });
