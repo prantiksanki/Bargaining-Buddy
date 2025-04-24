@@ -1,21 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, AlertTriangle, ArrowDown, TrendingDown, Tag, ShoppingBag, Check, X } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 
 const ProductPage = ({ searchQuery }) => {
   const location = useLocation();
   const query = searchQuery || new URLSearchParams(location.search).get('search');
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
+        setLoading(true);
         console.log(query);
         const res = await fetch(`http://localhost:5000/scrape?id=${query}`);
         const data = await res.json();
         setProducts(Array.isArray(data) ? data : [data]);
       } catch (err) {
         console.error('Error fetching product:', err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -24,98 +28,168 @@ const ProductPage = ({ searchQuery }) => {
     }
   }, [query]);
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="flex flex-col items-center text-blue-600 animate-pulse">
+          <div className="w-16 h-16 border-4 border-blue-200 rounded-full border-t-blue-600 animate-spin"></div>
+          <p className="mt-4 font-medium text-gray-700">Loading product data...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!products.length) {
     return (
-      <div className="min-h-screen p-8 text-white bg-gray-900">
-        <h1 className="p-4 text-sm text-gray-300">Loading...</h1>
+      <div className="flex items-center justify-center min-h-screen p-8 bg-gray-50">
+        <div className="p-8 text-center bg-white rounded-lg shadow-md">
+          <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-amber-500" />
+          <h1 className="text-2xl font-bold text-gray-800">No Products Found</h1>
+          <p className="mt-2 text-gray-600">We couldn't find any products matching your query.</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen p-8 space-y-12 text-white bg-gray-900">
+    <div className="min-h-screen py-8 bg-gray-50">
       {products.map((product, index) => (
-        <div
-          key={index}
-          className={`max-w-7xl mx-auto rounded-xl p-6 shadow-md ${
-            index % 2 === 0 ? 'bg-[#0f172a]' : 'bg-[#1a2332]'
-          }`}
-        >
-          <h1 className="mb-1 text-3xl font-bold">{product.name}</h1>
-          <p className="mb-2 text-gray-400">{product.category}</p>
-          <p className="mb-4 text-gray-400">Size: {product.size}</p>
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-            {/* Product Image and Price Range */}
-            <div>
-              <img
-                src={product.image.replace("100x100", "1100x1000")}
-                alt={product.name}
-                style={{
-                  width: 'auto',
-                  height: 'auto',
-                  border: 'none',
-                  maxWidth: '100%',
-                  pointerEvents: 'auto',
-                  maxHeight: '100%',
-                  display: 'inline-block',
-                  position: 'relative'
-                }}
-                className="mb-4 rounded-lg"
-              />
-              <p className="text-xl font-semibold mb-2">
-                Rs. {product.lowestPrice} - Rs. {product.highestPrice}
-              </p>
-              <p className="text-lg font-medium mb-4">
-                Average Price: Rs. {product.averagePrice}
-              </p>
-              <button className="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700">
-                Set Price Alert
-              </button>
-            </div>
-
-            {/* Price Comparison Table */}
-            <div>
-              <div className="flex items-center justify-between px-4 py-2 text-sm font-semibold bg-gray-700 rounded-t-lg">
-                <p>Price Comparison</p>
-                <p>Price</p>
+        <div key={index} className="px-4 mx-auto mb-12 max-w-7xl sm:px-6 lg:px-8">
+          <div className="overflow-hidden bg-white shadow-sm rounded-xl">
+            {/* Product Header */}
+            <div className="px-6 py-5 border-b border-gray-100">
+              <div className="flex flex-wrap items-center justify-between">
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">{product.name}</h1>
+                  <div className="flex items-center mt-1">
+                    <Tag className="w-4 h-4 mr-1 text-gray-500" />
+                    <span className="text-sm text-gray-500">{product.category}</span>
+                    {product.size && (
+                      <>
+                        <span className="mx-2 text-gray-300">|</span>
+                        <span className="text-sm text-gray-500">Size: {product.size}</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <div className="mt-4 sm:mt-0">
+                  <button className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Set Price Alert
+                    <TrendingDown className="w-4 h-4 ml-2" />
+                  </button>
+                </div>
               </div>
-              <div className="bg-gray-800 divide-y divide-gray-700 rounded-b-lg">
-                {product.prices.map((item, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between px-4 py-3"
-                  >
-                    <div>
-                      <p className="font-medium">{item.retailer}</p>
-                      <p className="text-sm">
-                        MRP: {item.mrp == "Not found" ? "N/A" : "₹ " + item.mrp} | Discount: {item.discount}
-                      </p>
-                      <p
-                        className={`text-sm ${
-                          item.inStock ? 'text-green-400' : 'text-red-400'
-                        }`}
-                      >
-                        {item.inStock ? 'In Stock' : 'Out of Stock'}
-                      </p>
+            </div>
+            
+            <div className="p-6">
+              <div className="grid grid-cols-1 gap-y-8 gap-x-12 lg:grid-cols-2">
+                {/* Product Image and Price Range */}
+                <div>
+                  <div className="p-2 mb-6 bg-gray-100 rounded-lg">
+                    <img
+                      src={product.image?.replace("100x100", "1100x1000") || '/api/placeholder/400/320'}
+                      alt={product.name}
+                      className="object-contain mx-auto rounded-lg"
+                      style={{ maxHeight: '400px' }}
+                    />
+                  </div>
+                  
+                  <div className="p-5 rounded-lg bg-blue-50">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-medium text-gray-900">Price Overview</h3>
+                      <ArrowDown className="w-4 h-4 text-green-600" />
                     </div>
-                    <div className="flex items-center gap-4">
-                      <p className="font-semibold text-green-400">
-                        Rs. {item.price.toFixed(2)}
-                      </p>
-                      <a
-                        href={item.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <ExternalLink className="w-5 h-5 text-blue-400 hover:text-blue-500" />
-                      </a>
+                    
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div className="p-3 bg-white rounded-lg shadow-sm">
+                        <p className="text-sm text-gray-500">Lowest Price</p>
+                        <p className="text-xl font-bold text-green-600">₹ {product.lowestPrice}</p>
+                      </div>
+                      <div className="p-3 bg-white rounded-lg shadow-sm">
+                        <p className="text-sm text-gray-500">Highest Price</p>
+                        <p className="text-xl font-bold text-red-500">₹ {product.highestPrice}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="p-3 mb-4 bg-white rounded-lg shadow-sm">
+                      <p className="text-sm text-gray-500">Average Price</p>
+                      <p className="text-xl font-bold text-blue-600">₹ {product.averagePrice}</p>
+                    </div>
+                    
+                    <div className="flex items-center text-sm text-gray-500">
+                      <ShoppingBag className="w-4 h-4 mr-1" />
+                      <span>Prices updated every 4 hours</span>
                     </div>
                   </div>
-                ))}
+                </div>
+
+                {/* Price Comparison Table */}
+                <div>
+                  <h3 className="mb-4 text-xl font-semibold text-gray-900">Price Comparison</h3>
+                  <div className="overflow-hidden border border-gray-200 rounded-lg">
+                    <div className="px-6 py-3 border-b border-gray-200 bg-gray-50">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-gray-700">Retailer</span>
+                        <span className="font-medium text-gray-700">Best Price</span>
+                      </div>
+                    </div>
+                    
+                    <div className="divide-y divide-gray-200">
+                      {product.prices.map((item, i) => (
+                        <div key={i} className="px-6 py-4 hover:bg-gray-50">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-gray-900">{item.retailer}</p>
+                              <div className="mt-1">
+                                <p className="text-sm text-gray-500">
+                                  MRP: {item.mrp === "Not found" ? "N/A" : "₹ " + item.mrp} 
+                                  {item.discount && item.discount !== "0%" && (
+                                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                      {item.discount} OFF
+                                    </span>
+                                  )}
+                                </p>
+                                <p className="flex items-center mt-1 text-sm">
+                                  {item.inStock ? (
+                                    <>
+                                      <Check className="w-4 h-4 mr-1 text-green-500" />
+                                      <span className="text-green-600">In Stock</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <X className="w-4 h-4 mr-1 text-red-500" />
+                                      <span className="text-red-600">Out of Stock</span>
+                                    </>
+                                  )}
+                                </p>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center">
+                              <div className="mr-4 text-right">
+                                <p className="text-lg font-bold text-blue-600">
+                                  ₹ {item.price.toFixed(2)}
+                                </p>
+                              </div>
+                              <a
+                                href={item.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                              >
+                                Visit
+                                <ExternalLink className="w-4 h-4 ml-1" />
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-          {/* Optional: More product details could be added here */}
         </div>
       ))}
     </div>
