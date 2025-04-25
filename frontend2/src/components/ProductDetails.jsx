@@ -21,6 +21,7 @@ const ProductPage = ({ searchQuery }) => {
         const res = await fetch(`http://localhost:5000/scrape?id=${encodeURIComponent(query)}`);
         if (!res.ok) throw new Error('Failed to fetch products');
         const data = await res.json();
+        console.log(data);
         setProducts(Array.isArray(data) ? data : [data]);
       } catch (err) {
         console.error('Error fetching product:', err);
@@ -72,7 +73,7 @@ const ProductPage = ({ searchQuery }) => {
               <div className="relative mb-8">
                 <img
                   src={product.image?.replace('100x100', '1100x1000') || '/placeholder.jpg'}
-                  alt={product.name || 'Product image'}
+                  alt={product.title || 'Product image'}
                   className="object-contain w-full rounded-2xl"
                   style={{ height: '400px' }}
                   onError={(e) => (e.target.src = '/placeholder.jpg')} // Fallback for broken images
@@ -83,7 +84,7 @@ const ProductPage = ({ searchQuery }) => {
               </div>
 
               <h1 className="mb-4 text-3xl font-bold text-gray-900">
-                {product.name || 'Unnamed Product'}
+                {product.title || 'Unnamed Product'}
               </h1>
 
               <button className="w-full py-3 font-medium text-white transition-colors bg-blue-500 rounded-full hover:bg-blue-600">

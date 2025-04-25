@@ -102,67 +102,7 @@ function RecentSearches() {
             ))}
           </div>
 
-          {/* Divider */}
-          {/* <hr className="my-8" /> */}
-
-          {/* Recent Searches Table */}
-         {/* <h2 className="mb-8 text-3xl font-bold text-gray-800">Recent Searches</h2>
-
-          <div className="overflow-hidden rounded-lg shadow-sm bg-gray-50">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200"> */}
-                {/* Table Head */}
-                {/* <thead className="bg-gray-100">
-                  <tr>
-                    <th className="px-4 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-                      Product
-                    </th>
-                    <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"> */}
-                      {/* Empty for image/title separation */}
-                    {/* </th>
-                    <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-                      Viewed On
-                    </th>
-                    <th className="px-6 py-3 text-xs font-medium tracking-wider text-right text-gray-500 uppercase">
-                      Action
-                    </th>
-                  </tr>
-                </thead> */}
-
-                {/* Table Body */}
-                {/* <tbody className="bg-white divide-y divide-gray-200">
-                  {recentSearches.map((entry) => (
-                    <tr key={entry.logId} className="hover:bg-gray-50">
-                      <td className="px-4 py-4 whitespace-nowrap">
-                        {entry.product.image ? (
-                          <img src={entry.product.image} alt={entry.product.title} className="object-contain w-10 h-10 rounded" />
-                        ) : (
-                          <div className="flex items-center justify-center w-10 h-10 text-gray-400 bg-gray-200 rounded">?</div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{entry.product.title}</div>
-                        <div className="text-xs text-gray-500">{entry.product.category}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{formatDate(entry.timestamp)}</div>
-                      </td>
-                      <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                        <button
-                          onClick={() => handleSearchClick(entry.product.id)}
-                          className="text-blue-600 hover:text-blue-900"
-                        >
-                          View Details
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-        </div> */}
+        </div>
 
       </div>
     </section>
