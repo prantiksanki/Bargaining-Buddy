@@ -1,191 +1,324 @@
-import React, { useState, useEffect } from 'react';
-import { Search, ExternalLink, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Search, MessageSquareText, ChevronRight, Loader2, AlertTriangle } from 'lucide-react'; // Added Loader2, AlertTriangle
 import { useNavigate } from 'react-router-dom';
+
+// Assuming formatPrice helper is available or defined here
+const formatPrice = (price) => {
+  if (typeof price === 'number') {
+    return `₹${price.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+  }
+  if (typeof price === 'string' && price.trim() !== '') {
+    return price;
+  }
+  return 'N/A';
+};
+
+const API_BASE_URL = 'http://localhost:5000'; // Centralize API URL
 
 const HeroSection = () => {
   const [query, setQuery] = useState('');
-  const [products, setProducts] = useState([]);
-  const [filtered, setFiltered] = useState([]);
-  const [isCardHovered, setIsCardHovered] = useState(false);
+  const [products, setProducts] = useState([]); // For suggestions list
+  const [filtered, setFiltered] = useState([]); // Filtered suggestions
+
+  // State for the featured product showcase
+  const [featuredProduct, setFeaturedProduct] = useState(null);
+  const [isFeaturedLoading, setIsFeaturedLoading] = useState(true);
+  const [featuredError, setFeaturedError] = useState(null);
+
   const navigate = useNavigate();
 
-  const selectedProduct = {
-    title: 'Apple AirPods Pro',
-    price: 249.99,
-    discountPrice: 194.99,
-    discountPercent: 22,
-    image: 'https://images.pexels.com/photos/3780681/pexels-photo-3780681.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-    stores: ['Amazon', 'Best Buy', 'Apple Store']
-  };
-
+  // --- Data Fetching for Search Suggestions ---
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchSuggestionProducts = async () => {
       try {
-        const res = await fetch('http://localhost:5000/product/recent-searches');
+        const res = await fetch(`${API_BASE_URL}/product/recent-searches`);
+        if (!res.ok) {
+          throw new Error(`API fetch failed with status: ${res.status}`);
+        }
         const data = await res.json();
-        setProducts(data);
+        // Ensure data is an array and extract product info safely
+        const recentProducts = Array.isArray(data) ? data.map(item => item?.product).filter(Boolean) : [];
+        setProducts(recentProducts);
       } catch (err) {
-        console.error('API fetch error:', err);
+        console.error('API fetch error for recent searches:', err);
+        setProducts([]);
       }
     };
-    fetchProducts();
+    fetchSuggestionProducts();
   }, []);
 
+  // --- Data Fetching for Featured Product Showcase ---
+  useEffect(() => {
+    const fetchFeaturedProduct = async () => {
+      setIsFeaturedLoading(true);
+      setFeaturedError(null);
+      setFeaturedProduct(null); // Reset previous product
+
+      try {
+        // Step 1: Get the ID from recent searches
+        const recentRes = await fetch(`${API_BASE_URL}/product/recent-searches`);
+        if (!recentRes.ok) {
+          throw new Error(`Failed to fetch recent searches: ${recentRes.status}`);
+        }
+        const recentData = await recentRes.json();
+
+
+        console.log('Recent Searches Data:', recentData); // Debugging line
+
+        // Find the first valid product ID from the recent searches list
+      
+        const firstProductId = recentData.length > 0 ? recentData[0]._id : null;
+
+        if (!firstProductId) {
+          throw new Error('No recent products found to feature.');
+        }
+
+        // Step 2: Fetch detailed product data using the ID
+        const productRes = await fetch(`${API_BASE_URL}/products/${firstProductId}`);
+        if (!productRes.ok) {
+          // Attempt to parse error message from backend if available
+          let errorMsg = `Failed to fetch product details: ${productRes.status}`;
+           try {
+                const errorData = await productRes.json();
+                errorMsg = errorData?.message || errorData?.error || errorMsg;
+           } catch (parseError) {
+               // Ignore if response is not JSON or empty
+           }
+          throw new Error(errorMsg);
+        }
+        const productData = await productRes.json();
+        setFeaturedProduct(productData);
+
+
+        console.log('Featured Product Data:', productData); // Debugging line
+
+      } catch (err) {
+        console.error('Error fetching featured product:', err);
+        setFeaturedError(err.message || 'Could not load featured product.');
+      } finally {
+        setIsFeaturedLoading(false);
+      }
+    };
+
+    fetchFeaturedProduct();
+  }, []); // Run only once on mount
+
+  // --- Client-Side Filtering for Search Suggestions ---
   useEffect(() => {
     if (query.trim() === '') {
       setFiltered([]);
     } else {
       const matches = products.filter((product) =>
-        (product?.title || product?.name || '').toLowerCase().includes(query.toLowerCase())
+        (product?.title || '').toLowerCase().includes(query.toLowerCase())
       );
-      setFiltered(matches);
+      setFiltered(matches.slice(0, 6));
     }
   }, [query, products]);
 
+  // --- Navigation Handlers ---
+  const handleSearchSubmit = () => {
+    if (query.trim()) {
+      navigate(`/result/${encodeURIComponent(query.trim())}`);
+      setQuery('');
+      setFiltered([]);
+    }
+  };
+
+  const handleSuggestionClick = (item) => {
+    const searchTerm = item.id || item.title; // Prefer ID if available for comparison page
+    setQuery(item.title || '');
+    setFiltered([]);
+    navigate(`/comparison?search=${encodeURIComponent(searchTerm)}`);
+  };
+
+  // --- Helper to get data safely for the featured card ---
+  const getFeaturedData = () => {
+      if (!featuredProduct) return {};
+
+      const title = featuredProduct.title || 'Product Title';
+      const image = featuredProduct.image || '/placeholder-image.svg'; // Provide a fallback image
+      // Use lowestPrice if available, otherwise find min from prices array, fallback to N/A
+      const currentPrice = typeof featuredProduct.lowestPrice === 'number'
+          ? featuredProduct.lowestPrice
+          : (featuredProduct.prices?.length > 0 ? Math.min(...featuredProduct.prices.map(p => p.price)) : null);
+
+      // Get MRP from the first retailer, fallback needed
+      const originalPrice = featuredProduct.prices?.[0]?.mrp;
+
+      // Get unique store names
+      const stores = featuredProduct.prices ? [...new Set(featuredProduct.prices.map(p => p.retailer))] : [];
+
+      return {
+          title,
+          image,
+          // Only show original price if it's higher than current price
+          originalPrice: (typeof originalPrice === 'number' && typeof currentPrice === 'number' && originalPrice > currentPrice) ? originalPrice : null,
+          currentPrice: typeof currentPrice === 'number' ? currentPrice : null,
+          stores,
+          // Navigate to comparison page for this specific product
+          compareUrl: `/comparison?search=${encodeURIComponent(featuredProduct._id)}`
+      };
+  };
+
+  const featured = getFeaturedData(); // Get processed data for rendering
+
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gray-100">
-      <div className="flex flex-col items-center px-4 py-12 mx-auto md:flex-row max-w-7xl sm:px-6 lg:px-8">
-        {/* Left Content */}
-        <div className="w-full md:w-1/2 md:pr-8">
-          <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
-            Stop overpaying.
-            <br />
-            Start saving.
-          </h1>
-          <p className="mt-4 text-lg text-gray-600">
-            Real time price tracking, across Amazon, Flipkart, 1mg, and more.
-          </p>
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-gray-50 to-gray-200">
+      <div className="relative z-10 flex flex-col items-center px-4 py-16 mx-auto md:flex-row max-w-7xl sm:px-6 lg:px-8 md:py-24">
 
-          {/* Search Bar */}
-          <div className="relative flex items-center mt-8">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <Search className="w-5 h-5 text-gray-400" />
+        {/* Left Content: Headline, Search */}
+        <div className="w-full md:w-1/2 md:pr-12 text-center md:text-left">
+           {/* ... (Headline, Description, Search Bar, Suggestions, Feature Buttons remain the same) ... */}
+           <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
+             Stop overpaying.
+             <br />
+             <span className="text-emerald-600">Start saving smarter.</span>
+           </h1>
+           <p className="mt-4 text-lg text-gray-600 md:mt-6">
+             Real-time price tracking across Amazon, Flipkart, and more. Find the best deals effortlessly.
+           </p>
+
+           {/* Search Bar & Suggestions */}
+           <div className="relative mt-8 md:mt-10 max-w-xl mx-auto md:mx-0">
+             <div className="flex items-center">
+               <div className="relative flex-grow">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                    <Search className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search for products (e.g., iPhone 15)"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit()}
+                    className="block w-full py-3 pl-12 pr-4 text-gray-900 transition-all duration-300 bg-white border border-gray-300 rounded-full shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 placeholder-gray-400"
+                  />
+               </div>
+               <button
+                  onClick={handleSearchSubmit}
+                  className="flex-shrink-0 px-5 py-3 ml-2 text-sm font-semibold text-white transition-colors duration-300 rounded-full shadow-md bg-emerald-500 hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+                >
+                 Search
+               </button>
+             </div>
+
+             {/* Dropdown for filtered search results */}
+             {filtered.length > 0 && (
+               <div className="absolute left-0 right-0 z-20 mt-1 overflow-hidden origin-top bg-white rounded-xl shadow-lg ring-1 ring-black ring-opacity-5">
+                 <ul className="py-1 overflow-y-auto max-h-60">
+                   {filtered.map((item, index) => (
+                     <li
+                       key={item.id || index}
+                       className="px-4 py-2 text-sm text-gray-700 transition-colors duration-150 cursor-pointer hover:bg-emerald-50 hover:text-emerald-800"
+                       onMouseDown={() => handleSuggestionClick(item)}
+                     >
+                       {item.title}
+                     </li>
+                   ))}
+                 </ul>
+               </div>
+             )}
+           </div>
+
+            {/* Feature Buttons */}
+            <div className="flex flex-wrap justify-center gap-3 mt-8 md:justify-start md:mt-10">
+                 <button className="px-4 py-2 text-xs font-medium text-gray-600 transition-colors duration-200 bg-white border border-gray-200 rounded-full hover:bg-gray-50 hover:border-gray-300">
+                   Top Electronics
+                 </button>
+                 <button className="px-4 py-2 text-xs font-medium text-gray-600 transition-colors duration-200 bg-white border border-gray-200 rounded-full hover:bg-gray-50 hover:border-gray-300">
+                   Fashion Deals
+                 </button>
+                 <button className="px-4 py-2 text-xs font-medium text-gray-600 transition-colors duration-200 bg-white border border-gray-200 rounded-full hover:bg-gray-50 hover:border-gray-300">
+                   Grocery Savings
+                 </button>
             </div>
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="block w-full py-3 pl-10 pr-4 text-gray-900 transition-all duration-300 bg-white border border-gray-300 rounded-full shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-            />
-            <button className="px-6 py-3 ml-2 font-medium text-white transition-all duration-300 rounded-full shadow bg-emerald-500 hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-             onClick={() => {
-              if (query.trim()) {
-                navigate(`/result/${query}`);
-              }
-            }}>
-              Search
-            </button>
-          </div>
-
-          {/* Dropdown for filtered search results */}
-          {filtered.length > 0 && (
-            <div className="absolute z-10 w-full mt-1 overflow-auto bg-white rounded-md shadow-lg max-h-60 md:max-w-xl">
-              <ul className="py-1">
-                {filtered.map((item, index) => (
-                  <li
-                    key={index}
-                    className="px-4 py-2 text-gray-700 transition-colors duration-200 cursor-pointer hover:bg-emerald-50"
-                    onClick={() => {
-                      setQuery(item.title || item.name);
-                      setFiltered([]);
-                      navigate(`/comparison?search=${encodeURIComponent(item.title || item.name)}`);
-                    }}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span>{item.title || item.name}</span>
-                      <span className="font-medium text-emerald-600">22% off</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Feature Buttons */}
-          <div className="flex flex-wrap gap-4 mt-8">
-            <button className="flex items-center justify-center px-6 py-3 text-sm font-medium text-white transition-colors duration-300 rounded-lg bg-emerald-500 hover:bg-emerald-600">
-              <span className="mr-2">○</span>
-              Electronics
-            </button>
-            <button className="flex items-center justify-center px-6 py-3 text-sm font-medium text-gray-700 transition-colors duration-300 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400">
-              <span className="mr-2">♡</span>
-              Fashion Deals
-            </button>
-            <button className="flex items-center justify-center px-6 py-3 text-sm font-medium text-gray-700 transition-colors duration-300 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400">
-              <span className="mr-2">⊕</span>
-              Grocery Deals
-            </button>
-          </div>
         </div>
 
-        {/* Right Content - Product Showcase */}
-        <div className="relative flex items-center justify-center w-full mt-10 md:w-1/2 md:mt-0">
-          <div 
-            className={`relative w-80 md:w-96 transition-all duration-500 ${isCardHovered ? 'scale-105' : 'scale-100'}`}
-            onMouseEnter={() => setIsCardHovered(true)}
-            onMouseLeave={() => setIsCardHovered(false)}
-          >
-            <div className="relative p-6 overflow-hidden shadow-xl bg-emerald-500 rounded-3xl">
-              {/* Background Pattern */}
-              <div className="absolute inset-0 opacity-10">
-                <div className="absolute w-40 h-40 bg-white rounded-full -right-8 -top-8"></div>
-                <div className="absolute w-40 h-40 bg-white rounded-full -left-8 -bottom-8"></div>
+        {/* Right Content - Dynamic Product Showcase */}
+        <div className="relative flex items-center justify-center w-full max-w-md mt-12 md:w-1/2 md:mt-0 md:pl-8 lg:pl-16">
+          {/* Container to maintain size during loading/error */}
+          <div className="w-full min-h-[480px] flex items-center justify-center bg-emerald-500 rounded-[32px] shadow-xl p-6">
+            {isFeaturedLoading ? (
+              <div className="flex flex-col items-center text-white">
+                <Loader2 className="w-10 h-10 animate-spin text-white/80" />
+                <p className="mt-3 text-sm text-white/80">Loading featured deal...</p>
               </div>
-              
-              <button className="absolute z-10 p-2 transition-colors duration-300 bg-white rounded-full shadow-md top-4 right-4 hover:bg-gray-100">
-                <ExternalLink className="w-4 h-4 text-emerald-600" />
-              </button>
+            ) : featuredError ? (
+              <div className="flex flex-col items-center text-center text-white">
+                 <AlertTriangle className="w-10 h-10 text-yellow-300" />
+                 <p className="mt-3 text-sm font-medium text-yellow-100">Error Loading Deal</p>
+                 <p className="mt-1 text-xs text-white/80">{featuredError}</p>
+               </div>
+            ) : featuredProduct ? (
+              // Main Card Content - Rendered only when data is ready
+              <div className="relative flex flex-col items-center w-full"> {/* Removed bg/rounding from here */}
+                {/* External Link / Action Button */}
+                <button className="absolute z-10 p-2 transition-colors duration-200 bg-white rounded-full shadow top-[-10px] right-[-10px] hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-300"> {/* Adjusted position */}
+                    <MessageSquareText className="w-4 h-4 text-emerald-700" />
+                </button>
 
-              <div className="relative flex flex-col items-center">
-                {/* Product Image */}
-                <div className="relative flex items-center justify-center w-full h-40 mb-4">
-                  <img
-                    src={selectedProduct.image}
-                    alt={selectedProduct.title}
-                    className={`h-40 object-contain transition-all duration-500 ${isCardHovered ? 'scale-110' : 'scale-100'}`}
-                  />
+                 {/* Product Image Area */}
+                <div className="relative flex items-center justify-center w-full mb-6 bg-black rounded-xl h-52">
+                    <div className="p-4">
+                       <img
+                         src={featured.image}
+                         alt={featured.title}
+                         className="object-contain h-40 max-w-full"
+                         onError={(e) => { e.target.onerror = null; e.target.src='/placeholder-image.svg'; }} // Add fallback
+                       />
+                    </div>
                 </div>
 
-                {/* Product Info */}
-                <div className="mt-4 text-center">
-                  <h3 className="text-xl font-bold text-white">{selectedProduct.title}</h3>
-                  <div className="flex items-center justify-center mt-2 space-x-3">
-                    <span className="text-white line-through text-opacity-80">${selectedProduct.price}</span>
-                    <span className="text-2xl font-bold text-white">${selectedProduct.discountPrice}</span>
+                 {/* Product Info */}
+                <div className="text-center">
+                  <h3 className="text-xl font-bold text-white line-clamp-2" title={featured.title}>{featured.title}</h3>
+                  <div className="flex items-baseline justify-center mt-2 space-x-2">
+                    {/* Conditionally render original price */}
+                    {featured.originalPrice && (
+                        <span className="text-base text-white line-through text-opacity-70">
+                            {formatPrice(featured.originalPrice)}
+                        </span>
+                    )}
+                    {/* Display current (lowest) price */}
+                    <span className="text-2xl font-bold text-white">
+                        {featured.currentPrice !== null ? formatPrice(featured.currentPrice) : 'Price Unavailable'}
+                    </span>
                   </div>
                 </div>
 
-                {/* Discount Badge */}
-                <div className={`absolute p-2 bg-gray-900 rounded-full -top-3 -right-3 transform transition-all duration-300 ${isCardHovered ? 'scale-110 rotate-12' : 'scale-100 rotate-0'}`}>
-                  <span className="px-1 text-sm font-bold text-white">{selectedProduct.discountPercent}%</span>
-                </div>
-
-                {/* Stores Available */}
+                 {/* Stores Available */}
                 <div className="w-full mt-6">
-                  <div className="mb-2 text-sm font-medium text-white">Available at:</div>
-                  <div className="space-y-2">
-                    {selectedProduct.stores.map((store, index) => (
-                      <div key={index} className="flex items-center justify-between p-2 transition-colors duration-300 bg-white rounded-lg bg-opacity-10 hover:bg-opacity-20">
-                        <span className="text-white">{store}</span>
-                        <ChevronRight className="w-4 h-4 text-white" />
+                  <div className="mb-2 text-sm font-medium text-white text-opacity-90">Available at:</div>
+                  <div className="space-y-2 max-h-24 overflow-y-auto pr-1"> {/* Limit height and add scroll */}
+                    {featured.stores.length > 0 ? featured.stores.map((store, index) => (
+                      <div key={`${store}-${index}`} className="flex items-center justify-between p-2 transition-colors duration-200 bg-white rounded-lg cursor-pointer bg-opacity-10 hover:bg-opacity-20"> {/* Adjusted padding */}
+                        <span className="text-xs text-white truncate">{store}</span>
+                        <ChevronRight className="w-4 h-4 text-white text-opacity-70 flex-shrink-0 ml-2" />
                       </div>
-                    ))}
+                    )) : (
+                         <p className="text-xs text-center text-white text-opacity-70">No online stores found.</p>
+                    )}
                   </div>
                 </div>
 
-                {/* Compare Button */}
-                <button 
-                  className={`mt-6 px-6 py-3 bg-white rounded-full text-emerald-600 font-medium shadow-lg hover:bg-gray-50 transition-all duration-300 ${isCardHovered ? 'scale-105' : 'scale-100'}`}
-                >
+                 {/* Compare Button - Now navigates */}
+                <button
+                   onClick={() => featured.compareUrl && navigate(featured.compareUrl)}
+                   disabled={!featured.compareUrl}
+                   className="mt-8 px-8 py-3 text-base font-semibold transition-colors duration-200 bg-white rounded-full shadow-lg text-emerald-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                 >
                   Compare Prices
                 </button>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+            ) : (
+                 // Fallback if product is null but no error/loading (shouldn't happen often)
+                 <div className="text-center text-white text-opacity-70">No featured product available.</div>
+            )}
+          </div> {/* End Loading/Error/Content Wrapper */}
+        </div> {/* End Right Content */}
+
+      </div> {/* End Main Flex Container */}
+    </div> /* End Hero Section */
   );
 };
 
