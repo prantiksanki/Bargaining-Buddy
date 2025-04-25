@@ -24,7 +24,7 @@ router.get("/search", async (req, res) => {
   console.log(`Search: "${query}", Page: ${page}, Limit: ${limit}, Sort: ${sortBy}, Category: ${categoryFilter}, MinPrice: ${minPriceFilter}, MaxPrice: ${maxPriceFilter}`);
 
   try {
-    let dbFilter = { $text: { $search: query } };
+    let dbFilter = { $text: { $search: `"${query}"` } };
 
     if (categoryFilter) {
       dbFilter.category = categoryFilter;
@@ -38,7 +38,7 @@ router.get("/search", async (req, res) => {
       priceFilter.$lte = maxPriceFilter;
     }
     if (Object.keys(priceFilter).length > 0) {
-       dbFilter.lastSeenPrice = priceFilter;
+      dbFilter.lastSeenPrice = priceFilter;
     }
 
     let sortOptions = {};
@@ -61,6 +61,9 @@ router.get("/search", async (req, res) => {
     const totalResults = await Product.countDocuments(dbFilter);
     const totalPages = Math.ceil(totalResults / limit);
 
+    console.log("DB Filter (Phrase Search):", JSON.stringify(dbFilter));
+    console.log("DB Sort:", JSON.stringify(sortOptions));
+
     const projection = {
       _id: 1, title: 1, image: 1, category: 1, lastSeenPrice: 1, createdAt: 1
     };
@@ -77,40 +80,40 @@ router.get("/search", async (req, res) => {
 
     const noFiltersApplied = !categoryFilter && isNaN(minPriceFilter) && isNaN(maxPriceFilter);
     if (page === 1 && dbResults.length === 0 && totalResults === 0 && noFiltersApplied) {
-      console.log(`DB Search for "${query}" found 0 results (no filters). Falling back to live scrape...`);
-      const scrapedResults = await searchProducts(query);
-      const limitedScrapedResults = scrapedResults.slice(0, limit);
-      console.log(`Live scrape for "${query}" returned ${limitedScrapedResults.length}/${scrapedResults.length} results.`);
-      return res.json({
+       console.log(`DB Phrase Search for "${query}" found 0 results (no filters). Falling back to live scrape...`);
+       const scrapedResults = await searchProducts(query);
+       const limitedScrapedResults = scrapedResults.slice(0, limit);
+       console.log(`Live scrape for "${query}" returned ${limitedScrapedResults.length}/${scrapedResults.length} results.`);
+       return res.json({
         results: limitedScrapedResults,
         currentPage: 1,
         totalPages: Math.ceil(scrapedResults.length / limit),
         totalResults: scrapedResults.length,
         source: 'scrape-fallback'
-      });
+       });
     }
 
     const formattedDbResults = dbResults.map(product => ({
-       id: product._id,
-       title: product.title,
-       image: product.image,
-       price: product.lastSeenPrice !== null && product.lastSeenPrice !== undefined ? product.lastSeenPrice : 'N/A',
-       category: product.category
+      id: product._id,
+      title: product.title,
+      image: product.image,
+      price: product.lastSeenPrice !== null && product.lastSeenPrice !== undefined ? product.lastSeenPrice : 'N/A',
+      category: product.category
     }));
 
     console.log(`Serving search results for "${query}" (Page ${page}) from DB.`);
     return res.json({
-      results: formattedDbResults,
-      currentPage: page,
-      totalPages: totalPages,
-      totalResults: totalResults,
-      source: 'db'
+       results: formattedDbResults,
+       currentPage: page,
+       totalPages: totalPages,
+       totalResults: totalResults,
+       source: 'db'
     });
 
   } catch (err) {
     console.error(`Error during search process for "${query}" (Page ${page}):`, err);
     if (err.message.includes('Text index required') || err.code === 2) {
-       return res.status(500).json({ error: "[CONFIG_ERROR] Text index or sort issue.", details: err.message });
+       return res.status(500).json({ error: "[CONFIG_ERROR] Text index issue or incompatible index hint.", details: err.message });
     }
     return res.status(500).json({ error: "[INTERNAL_ERROR] Search process failed.", details: err.message });
   }
@@ -121,19 +124,23 @@ router.get("/scrape", async (req, res) => {
   if (!id || !mongoose.Types.ObjectId.isValid(id)) {
     return res.status(400).json({ error: "[INVALID_PARAM_API_ERROR] Invalid or missing 'id' parameter" });
   }
+
   let productDetails;
   let source = 'cache';
+
   try {
     const productFromDb = await Product.findById(id);
     if (!productFromDb) {
       return res.status(404).json({ error: "[NOT_FOUND_API_ERROR] Product not found in database." });
     }
+
     const now = Date.now();
     const lastScanTime = (productFromDb.lastScanSuccess && productFromDb.lastScanAttempt)
                ? new Date(productFromDb.lastScanAttempt).getTime()
                : new Date(productFromDb.updatedAt).getTime();
     const isDataStale = (now - lastScanTime) > CACHE_DURATION_MILLISECONDS;
     const isDataInvalid = !productFromDb.prices || productFromDb.prices.length === 0 || !productFromDb.lastScanSuccess;
+
     if (isDataStale || isDataInvalid) {
       console.log(`Cache stale or invalid for product ${id}. Re-scraping...`);
       source = 'scrape';
@@ -148,6 +155,7 @@ router.get("/scrape", async (req, res) => {
       productDetails = productFromDb;
       source = 'cache';
     }
+
     if (productDetails && productDetails._id) {
       try {
         const recent = new RecentSearch({ productId: productDetails._id });
@@ -159,7 +167,9 @@ router.get("/scrape", async (req, res) => {
     } else {
        console.warn(`Recent search not logged for ID ${id} because productDetails were invalid or missing after check/scrape.`);
     }
+
     res.json(productDetails);
+
   } catch (err) {
     console.error(`Error in /scrape endpoint for ID ${id}:`, err.message);
     return res.status(500).json({
