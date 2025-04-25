@@ -13,7 +13,7 @@ const NavBar = () => {
           {/* Logo and Brand */}
           <div className="flex items-center flex-shrink-0">
             <Link 
-              to="/" 
+              to="/home" 
               className="flex items-center space-x-2"
             >
               <ShoppingBag className="w-8 h-8 text-emerald-500" />
@@ -23,7 +23,7 @@ const NavBar = () => {
             </Link>
           </div>
 
-          {/* Search Bar - Desktop */}
+          {/* Search Bar - Desktop
           <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-center lg:ml-6">
             <div className="relative w-full max-w-lg">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -35,7 +35,7 @@ const NavBar = () => {
                 className="w-full py-2 pl-10 pr-4 text-gray-900 placeholder-gray-500 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               />
             </div>
-          </div>
+          </div> */}
 
           {/* Desktop Navigation */}
           <div className="hidden sm:flex sm:items-center sm:space-x-6">

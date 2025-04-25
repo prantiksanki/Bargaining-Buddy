@@ -113,11 +113,11 @@ const ProductPage = ({ searchQuery }) => {
                   onError={(e) => (e.target.src = '/placeholder.jpg')}
                 />
                 <button className="absolute p-2 transition-all duration-200 bg-white rounded-full shadow-md top-4 right-4 hover:shadow-lg hover:scale-110">
-                  <Heart className="w-5 h-5 text-gray-400 hover:text-red-500 transition-colors" />
+                  <Heart className="w-5 h-5 text-gray-400 transition-colors hover:text-red-500" />
                 </button>
               </div>
 
-              <h1 className="mb-5 text-2xl md:text-3xl font-bold text-gray-900 leading-tight">
+              <h1 className="mb-5 text-2xl font-bold leading-tight text-gray-900 md:text-3xl">
                 {product.title || 'Unnamed Product'}
               </h1>
 
@@ -136,7 +136,7 @@ const ProductPage = ({ searchQuery }) => {
               <div className="flex items-center justify-between mb-6 md:mb-8">
                 <h2 className="text-2xl font-bold text-gray-800">Price Matrix</h2>
                 {/* Search button functionality might need separate implementation */}
-                <button className="p-2 transition-colors duration-200 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-700">
+                <button className="p-2 text-gray-500 transition-colors duration-200 rounded-full hover:bg-gray-200 hover:text-gray-700">
                   <Search className="w-6 h-6" />
                 </button>
               </div>
@@ -146,9 +146,9 @@ const ProductPage = ({ searchQuery }) => {
                 <>
                   {/* Highlighted Minimum Price Card */}
                   <div className="bg-gradient-to-r from-[#e8f5f0] to-[#d8f0e5] rounded-2xl p-5 md:p-6 mb-6 shadow-md hover:shadow-lg transition-shadow duration-300 border border-green-200">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
                       <div>
-                        <p className="text-xs text-green-700 uppercase font-semibold mb-1">Best Price Found</p>
+                        <p className="mb-1 text-xs font-semibold text-green-700 uppercase">Best Price Found</p>
                         <h3 className="mb-1 text-3xl font-bold text-green-800">
                           Rs. {product.prices[0].price}
                         </h3>
@@ -189,7 +189,7 @@ const ProductPage = ({ searchQuery }) => {
                           </div>
 
                           <div className="flex items-center flex-shrink-0 gap-3 sm:gap-4">
-                            <span className="font-semibold text-lg text-blue-600">
+                            <span className="text-lg font-semibold text-blue-600">
                               Rs. {item.price}
                             </span>
                             <ChevronRight
@@ -203,7 +203,7 @@ const ProductPage = ({ searchQuery }) => {
                 </>
               ) : (
                 // Display when no price info is available
-                <div className="bg-gray-100 rounded-2xl p-6 text-center">
+                <div className="p-6 text-center bg-gray-100 rounded-2xl">
                   <p className="text-gray-600">No price information currently available for this product.</p>
                 </div>
               )}

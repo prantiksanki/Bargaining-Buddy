@@ -4,10 +4,6 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const user = require("./models/User.js");
 
-mongoose.connect("mongodb://localhost:27017/bargainbuddy", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-});
 
 // Import Routes
 const productRoutes = require("./routes/productRoutes");
@@ -50,7 +46,7 @@ app.post("/signup", (req, res) => {
       console.error("Error creating user:", err);
       res.status(500).json({ error: "Internal server error" });
     });
-});
+});  
 
 app.post("/login" , (req,res) =>
 {
@@ -74,7 +70,7 @@ app.post("/login" , (req,res) =>
 
 // Connect to MongoDB
 mongoose
-  .connect(process.env.MONGO_URI || "mongodb://localhost:27017/bargainbuddy", {
+  .connect("mongodb://localhost:27017/bargainbuddy" || process.env.MONGO_URI , {
     useNewUrlParser: true,
     useUnifiedTopology: true
   })
