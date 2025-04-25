@@ -14,7 +14,6 @@ export default function Home() {
           <PopularComparisons />
           <RecentSearches />
         </div>
-  
         <Footer />
       </div>
     );

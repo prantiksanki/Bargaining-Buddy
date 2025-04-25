@@ -1,193 +1,159 @@
 import React, { useEffect, useState } from 'react';
-import { ExternalLink, AlertTriangle, ArrowDown, TrendingDown, Tag, ShoppingBag, Check, X } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
+import { Search, ChevronRight, Plus, Heart } from 'lucide-react';
+import loadingAnimation from '../assets/Loading.json'; // Renamed to avoid conflict
+import { Player } from '@lottiefiles/react-lottie-player';
 
 const ProductPage = ({ searchQuery }) => {
   const location = useLocation();
   const query = searchQuery || new URLSearchParams(location.search).get('search');
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false); // Renamed for clarity
+  const [error, setError] = useState(null); // Added for error handling
 
   useEffect(() => {
     const fetchProducts = async () => {
+      if (!query) return; // Early return if no query
+
       try {
-        setLoading(true);
-        console.log(query);
-        const res = await fetch(`http://localhost:5000/scrape?id=${query}`);
+        setIsLoading(true);
+        setError(null); // Reset error state
+        const res = await fetch(`http://localhost:5000/scrape?id=${encodeURIComponent(query)}`);
+        if (!res.ok) throw new Error('Failed to fetch products');
         const data = await res.json();
         setProducts(Array.isArray(data) ? data : [data]);
       } catch (err) {
         console.error('Error fetching product:', err);
+        setError('Failed to load products. Please try again later.');
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
-    if (query) {
-      fetchProducts();
-    }
+    fetchProducts();
   }, [query]);
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="flex flex-col items-center text-blue-600 animate-pulse">
-          <div className="w-16 h-16 border-4 border-blue-200 rounded-full border-t-blue-600 animate-spin"></div>
-          <p className="mt-4 font-medium text-gray-700">Loading product data...</p>
-        </div>
+      <div className="flex items-center justify-center h-screen bg-white">
+        <Player
+          autoplay
+          loop
+          src={loadingAnimation}
+          style={{ height: '300px', width: '300px' }}
+        />
       </div>
     );
   }
 
-  if (!products.length) {
+  if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen p-8 bg-gray-50">
-        <div className="p-8 text-center bg-white rounded-lg shadow-md">
-          <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-amber-500" />
-          <h1 className="text-2xl font-bold text-gray-800">No Products Found</h1>
-          <p className="mt-2 text-gray-600">We couldn't find any products matching your query.</p>
-        </div>
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <p className="text-lg text-red-500">{error}</p>
+      </div>
+    );
+  }
+
+  if (products.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <p className="text-lg text-gray-500">No products found for "{query}".</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen py-8 bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
       {products.map((product, index) => (
-        <div key={index} className="px-4 mx-auto mb-12 max-w-7xl sm:px-6 lg:px-8">
-          <div className="overflow-hidden bg-white shadow-sm rounded-xl">
-            {/* Product Header */}
-            <div className="px-6 py-5 border-b border-gray-100">
-              <div className="flex flex-wrap items-center justify-between">
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">{product.name}</h1>
-                  <div className="flex items-center mt-1">
-                    <Tag className="w-4 h-4 mr-1 text-gray-500" />
-                    <span className="text-sm text-gray-500">{product.category}</span>
-                    {product.size && (
-                      <>
-                        <span className="mx-2 text-gray-300">|</span>
-                        <span className="text-sm text-gray-500">Size: {product.size}</span>
-                      </>
-                    )}
-                  </div>
-                </div>
-                <div className="mt-4 sm:mt-0">
-                  <button className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                    Set Price Alert
-                    <TrendingDown className="w-4 h-4 ml-2" />
-                  </button>
-                </div>
+        <div key={product.id || index} className="container px-4 py-8 mx-auto">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+            {/* Left Column - Product Image and Details */}
+            <div className="bg-[#f0f7f4] rounded-3xl p-8">
+              <div className="relative mb-8">
+                <img
+                  src={product.image?.replace('100x100', '1100x1000') || '/placeholder.jpg'}
+                  alt={product.name || 'Product image'}
+                  className="object-contain w-full rounded-2xl"
+                  style={{ height: '400px' }}
+                  onError={(e) => (e.target.src = '/placeholder.jpg')} // Fallback for broken images
+                />
+                <button className="absolute p-2 transition-shadow bg-white rounded-full shadow-sm top-4 right-4 hover:shadow-md">
+                  <Heart className="w-5 h-5 text-gray-400 hover:text-red-500" />
+                </button>
               </div>
-            </div>
-            
-            <div className="p-6">
-              <div className="grid grid-cols-1 gap-y-8 gap-x-12 lg:grid-cols-2">
-                {/* Product Image and Price Range */}
-                <div>
-                  <div className="p-2 mb-6 bg-gray-100 rounded-lg">
-                    <img
-                      src={product.image?.replace("100x100", "1100x1000") || '/api/placeholder/400/320'}
-                      alt={product.name}
-                      className="object-contain mx-auto rounded-lg"
-                      style={{ maxHeight: '400px' }}
-                    />
-                  </div>
-                  
-                  <div className="p-5 rounded-lg bg-blue-50">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-medium text-gray-900">Price Overview</h3>
-                      <ArrowDown className="w-4 h-4 text-green-600" />
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div className="p-3 bg-white rounded-lg shadow-sm">
-                        <p className="text-sm text-gray-500">Lowest Price</p>
-                        <p className="text-xl font-bold text-green-600">₹ {product.lowestPrice}</p>
-                      </div>
-                      <div className="p-3 bg-white rounded-lg shadow-sm">
-                        <p className="text-sm text-gray-500">Highest Price</p>
-                        <p className="text-xl font-bold text-red-500">₹ {product.highestPrice}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="p-3 mb-4 bg-white rounded-lg shadow-sm">
-                      <p className="text-sm text-gray-500">Average Price</p>
-                      <p className="text-xl font-bold text-blue-600">₹ {product.averagePrice}</p>
-                    </div>
-                    
-                    <div className="flex items-center text-sm text-gray-500">
-                      <ShoppingBag className="w-4 h-4 mr-1" />
-                      <span>Prices updated every 4 hours</span>
-                    </div>
-                  </div>
-                </div>
 
-                {/* Price Comparison Table */}
-                <div>
-                  <h3 className="mb-4 text-xl font-semibold text-gray-900">Price Comparison</h3>
-                  <div className="overflow-hidden border border-gray-200 rounded-lg">
-                    <div className="px-6 py-3 border-b border-gray-200 bg-gray-50">
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium text-gray-700">Retailer</span>
-                        <span className="font-medium text-gray-700">Best Price</span>
+              <h1 className="mb-4 text-3xl font-bold text-gray-900">
+                {product.name || 'Unnamed Product'}
+              </h1>
+
+              <button className="w-full py-3 font-medium text-white transition-colors bg-blue-500 rounded-full hover:bg-blue-600">
+                Set Price Alert →
+              </button>
+            </div>
+
+            {/* Right Column - Price Comparison */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-2xl font-bold">Price Matrix</h2>
+                <button className="p-2 transition-colors rounded-full hover:bg-gray-100">
+                  <Search className="w-6 h-6" />
+                </button>
+              </div>
+
+              {product.prices && product.prices.length > 0 ? (
+                <>
+                  {/* Highlighted Minimum Price Card */}
+                  <div className="bg-[#e8f5f0] rounded-2xl p-6 mb-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="mb-2 text-2xl font-semibold text-green-700">
+                          Rs. {product.prices[0].price}
+                        </h3>
+                        <p className="text-green-600">
+                          In Stock at {product.prices[0].retailer}
+                        </p>
                       </div>
-                    </div>
-                    
-                    <div className="divide-y divide-gray-200">
-                      {product.prices.map((item, i) => (
-                        <div key={i} className="px-6 py-4 hover:bg-gray-50">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-medium text-gray-900">{item.retailer}</p>
-                              <div className="mt-1">
-                                <p className="text-sm text-gray-500">
-                                  MRP: {item.mrp === "Not found" ? "N/A" : "₹ " + item.mrp} 
-                                  {item.discount && item.discount !== "0%" && (
-                                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                                      {item.discount} OFF
-                                    </span>
-                                  )}
-                                </p>
-                                <p className="flex items-center mt-1 text-sm">
-                                  {item.inStock ? (
-                                    <>
-                                      <Check className="w-4 h-4 mr-1 text-green-500" />
-                                      <span className="text-green-600">In Stock</span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <X className="w-4 h-4 mr-1 text-red-500" />
-                                      <span className="text-red-600">Out of Stock</span>
-                                    </>
-                                  )}
-                                </p>
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center">
-                              <div className="mr-4 text-right">
-                                <p className="text-lg font-bold text-blue-600">
-                                  ₹ {item.price.toFixed(2)}
-                                </p>
-                              </div>
-                              <a
-                                href={item.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                              >
-                                Visit
-                                <ExternalLink className="w-4 h-4 ml-1" />
-                              </a>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+                      <button
+                        className="p-2 text-white transition-colors duration-200 bg-blue-500 rounded-full hover:bg-blue-600"
+                        onClick={() => window.open(product.prices[0].url, '_blank')}
+                      >
+                        <Plus className="w-5 h-5" />
+                      </button>
                     </div>
                   </div>
+
+                  {/* Price Comparison List */}
+                  {product.prices.map((item) => (
+                    <div
+                      key={item.url || item.retailer} // Use unique identifier
+                      className="p-6 transition-colors bg-gray-100 shadow-sm rounded-2xl hover:bg-gray-50 group hover:shadow-md"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="mb-1 font-medium">{item.retailer}</h3>
+                          <p className="text-gray-500">
+                            Discount: {item.discount && item.discount !== '0%' ? item.discount : '0%'}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                          <span className="font-semibold text-blue-500">
+                            Rs. {item.price}
+                          </span>
+                          <ChevronRight
+                            className="w-5 h-5 text-gray-400 cursor-pointer group-hover:text-gray-600"
+                            onClick={() => window.open(item.url, '_blank')}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              ) : (
+                <div className="bg-[#e8f5f0] rounded-2xl p-6 mb-6">
+                  <p>No price information available.</p>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

@@ -1,380 +1,363 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Mail, Lock, ShoppingBag, ArrowRight, Tag, Gift, Star, Sparkles, User, MapPin } from 'lucide-react';
 
 const BargainBuddyAuth = () => {
-  const [activeTab, setActiveTab] = useState('login');
-  const [loading, setLoading] = useState(false);
+  const [isLogin, setIsLogin] = useState(true);
+  const [name, setName] = useState(''); // New state for name
+  const [mail, setMail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [location, setLocation] = useState(''); // New state for location
+  const [description, setDescription] = useState(''); // New state for description
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [accountCreated, setAccountCreated] = useState(false); // New state to track account creation
   const navigate = useNavigate();
-  
-  // Login form state
-  const [loginData, setLoginData] = useState({
-    email: '',
-    password: '',
-    rememberMe: false
-  });
-  
-  // Signup form state
-  const [signupData, setSignupData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    agreeToTerms: false
-  });
-  
-  // Handle login form changes
-  const handleLoginChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setLoginData({
-      ...loginData,
-      [name]: type === 'checkbox' ? checked : value
-    });
-  };
-  
-  // Handle signup form changes
-  const handleSignupChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setSignupData({
-      ...signupData,
-      [name]: type === 'checkbox' ? checked : value
-    });
-  };
-  
-  // Handle login submission
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
-    setSuccess('');
-    
-    try {
-      // Example API call
-      const response = await fetch('http://localhost:5000/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(loginData)
-      });
 
-      if(response.ok) {
-        setLoading(false);
-        setSuccess('Login successful! Redirecting to dashboard...');
-        navigate("/") 
-      } else {
-        setLoading(false);
-        setError('Login failed. Please check your credentials and try again.');
-      }
-    } catch (err) {
-      setLoading(false);
-      setError('Login failed. Please check your credentials and try again.');
-      console.error('Login error:', err);
-    }
-  };
-  
-  // Handle signup submission
-  const handleSignup = async (e) => {
-    e.preventDefault();
-    
-    // Basic validation
-    if (signupData.password !== signupData.confirmPassword) {
-      setError('Passwords do not match');
+    if (!mail || !password) {
+      setError('Please enter your email and password.');
       return;
     }
-    
-    setLoading(true);
-    setError('');
-    setSuccess('');
-    
+
+    if (!isLogin && (!name || !location || !description)) {
+      setError('Please enter your name, location, and description.');
+      return;
+    }
+
+    if (!isLogin && !confirmPassword) {
+      setError('Please confirm your password.');
+      return;
+    }
+
+    if (!isLogin && password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+
+    const endpoint = isLogin ? 'http://localhost:5000/login' : 'http://localhost:5000/signup';
+
     try {
-      // Example API call
-      const response = await fetch('http://localhost:5000/signup', {
+      const body = isLogin
+        ? JSON.stringify({
+          mail: mail,
+          password: password,
+        })
+        : JSON.stringify({
+          name: name,
+          mail: mail,
+          password: password,
+          location: location,
+          description: description,
+        });
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(signupData)
+        body: body,
       });
+
+      const data = await response.json();
+      // console.log(response);
+      // console.log(data);
+      const details = data.user[0];
+      console.log(details);
+
+
+
       
-      // For demo purposes - simulating API response
-      setTimeout(() => {
-        setLoading(false);
-        setSuccess('Account created successfully! You can now log in.');
-        setActiveTab('login');
-      }, 1500);
-      
-    } catch (err) {
-      setLoading(false);
-      setError('Signup failed. Please try again later.');
-      console.error('Signup error:', err);
+      if (!response.ok) {
+        setError(data.message || 'Failed to authenticate. Please try again.');
+        return;
+      }
+      else
+      {
+        localStorage.setItem('email', mail); 
+        localStorage.setItem('password', password); 
+        localStorage.setItem('name', details.name);
+        localStorage.setItem('location', details.location);
+        localStorage.setItem('description', details.description);
+        localStorage.setItem('accountCreated', details.createdAt);
+        
+        navigate('/home');
+      }
+
+      // Handle successful authentication (e.g., store token, redirect)
+      console.log('Success:', data);
+
+      if (!isLogin) {
+        setAccountCreated(true);
+        setIsLogin(true);
+      }
+
+
+    } catch (error) {
+      console.error('Error:', error);
+      setError('An unexpected error occurred. Please try again later.');
     }
   };
-  
-  // Features list
-  const features = [
-    'Find the best deals on products you love',
-    'Get personalized recommendations',
-    'Save with exclusive discount codes',
-    'Track price history on your favorite items'
-  ];
-  
+
   return (
-    <div className="flex items-center justify-center min-h-screen p-4 bg-gray-50">
-      <div className="flex flex-col w-full max-w-6xl overflow-hidden shadow-lg md:flex-row rounded-xl">
-        {/* Left side - Promotional content */}
-        <div className="relative p-8 overflow-hidden text-white bg-gradient-to-r from-blue-600 to-indigo-500 md:p-12 md:w-1/2">
-          <div className="absolute inset-0 opacity-10">
-            <svg className="w-full h-full" viewBox="0 0 800 800">
-              <path d="M769 229L1037 260.9M927 880L731 737 520 660 309 538 40 599 295 764 126.5 879.5 40 599-197 493 102 382-31 229 126.5 79.5-69-63" stroke="white" strokeWidth="100" fill="none" fillRule="evenodd" strokeLinecap="round"></path>
-            </svg>
-          </div>
-          
-          <div className="relative z-10">
-            <h2 className="mb-6 text-4xl font-bold">BargainBuddy</h2>
-            <p className="mb-8 text-xl">Your personal shopping assistant to find the best deals online!</p>
-            
-            <ul className="mb-8 space-y-4">
-              {features.map((feature, index) => (
-                <li key={index} className="flex items-start">
-                  <span className="flex items-center justify-center flex-shrink-0 w-6 h-6 mt-1 mr-3 bg-white rounded-full">
-                    <svg className="w-4 h-4 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </span>
-                  <span>{feature}</span>
-                </li>
-              ))}
-            </ul>
-            
-            <div className="mt-8">
-              <div className="flex items-center mb-4 space-x-4">
-                <div className="w-12 h-12 p-1 overflow-hidden rounded-full bg-white/20">
-                  <img src="https://static.vecteezy.com/system/resources/previews/021/548/095/non_2x/default-profile-picture-avatar-user-avatar-icon-person-icon-head-icon-profile-picture-icons-default-anonymous-user-male-and-female-businessman-photo-placeholder-social-network-avatar-portrait-free-vector.jpg" alt="User" className="object-cover w-full h-full rounded-full" />
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-green-50 via-white to-green-50">
+      {/* Decorative Elements */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-0 left-0 bg-green-100 rounded-full w-72 h-72 mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+        <div className="absolute top-0 right-0 bg-green-200 rounded-full w-72 h-72 mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+        <div className="absolute bg-green-300 rounded-full -bottom-8 left-20 w-72 h-72 mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+      </div>
+
+      <div className="relative flex items-center justify-center min-h-screen p-4">
+        <div className="container max-w-7xl">
+          <div className="grid items-center gap-12 lg:grid-cols-2">
+            {/* Left Side - Hero Section */}
+            <div className="space-y-8">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white rounded-lg shadow-md">
+                  <ShoppingBag className="w-8 h-8 text-green-600" />
                 </div>
-                <div>
-                  <p className="font-medium">"I saved over $500 last month using BargainBuddy!"</p>
-                  <p className="text-sm text-white/80">— Prantik Sanki</p>
-                </div>
+                <h1 className="text-3xl font-bold text-gray-900">Bargain Buddy</h1>
               </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Right side - Auth forms */}
-        <div className="p-8 bg-white md:p-12 md:w-1/2">
-          <div className="max-w-md mx-auto">
-            <div className="mb-8 text-center">
-              <div className="inline-block p-2 mb-4 bg-blue-100 rounded-full">
-                <svg className="w-10 h-10 text-blue-600" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                  <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
+
+              <div className="space-y-4">
+                <h2 className="text-5xl font-bold text-gray-900">
+                  Smart Shopping, <br />
+                  <span className="text-green-600">Smarter Savings</span>
+                </h2>
+                <p className="max-w-lg text-xl text-gray-600">
+                  Join thousands of smart shoppers who save money every day with Bargain Buddy's exclusive deals and personalized recommendations.
+                </p>
               </div>
-              <h2 className="text-3xl font-bold text-gray-800">BargainBuddy</h2>
-              <p className="text-gray-600">Find deals. Save money. Shop smarter.</p>
-            </div>
-            
-            {/* Tabs */}
-            <div className="flex mb-6 border-b border-gray-200">
-              <button
-                className={`py-2 px-4 font-medium ${activeTab === 'login' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
-                onClick={() => setActiveTab('login')}
-              >
-                Login
-              </button>
-              <button
-                className={`py-2 px-4 font-medium ${activeTab === 'signup' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
-                onClick={() => setActiveTab('signup')}
-              >
-                Sign Up
-              </button>
-            </div>
-            
-            {/* Error and success messages */}
-            {error && (
-              <div className="p-3 mb-4 text-red-700 bg-red-100 border border-red-200 rounded-md">
-                {error}
-              </div>
-            )}
-            
-            {success && (
-              <div className="p-3 mb-4 text-green-700 bg-green-100 border border-green-200 rounded-md">
-                {success}
-              </div>
-            )}
-            
-            {/* Login Form */}
-            {activeTab === 'login' && (
-              <form onSubmit={handleLogin}>
-                <div className="mb-4">
-                  <label htmlFor="email" className="block mb-2 font-medium text-gray-700">Email</label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={loginData.email}
-                    onChange={handleLoginChange}
-                    className="w-full px-4 py-2 text-gray-800 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    required
-                  />
-                </div>
-                
-                <div className="mb-4">
-                  <div className="flex justify-between mb-2">
-                    <label htmlFor="password" className="block font-medium text-gray-700">Password</label>
-                    <a href="#" className="text-sm text-blue-600 hover:underline">Forgot password?</a>
+
+              {/* Feature Cards with Images */}
+              <div className="grid gap-6 sm:grid-cols-2">
+                <div className="relative p-6 overflow-hidden transition transform bg-white border shadow-sm group rounded-xl border-green-50 hover:scale-105">
+                  <div className="absolute inset-0 transition-opacity opacity-10 group-hover:opacity-20">
+                    <img
+                      src="https://images.pexels.com/photos/3944405/pexels-photo-3944405.jpeg"
+                      alt="Shopping Deals"
+                      className="object-cover w-full h-full"
+                    />
                   </div>
-                  <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    value={loginData.password}
-                    onChange={handleLoginChange}
-                    className="w-full px-4 py-2 text-gray-800 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    required
-                  />
+                  <div className="relative">
+                    <Tag className="w-8 h-8 mb-3 text-green-600" />
+                    <h3 className="mb-2 font-semibold text-gray-900">Smart Deals</h3>
+                    <p className="text-gray-600">AI-powered deal finder that matches your preferences.</p>
+                  </div>
                 </div>
-                
-                <div className="flex items-center mb-6">
-                  <input
-                    type="checkbox"
-                    id="rememberMe"
-                    name="rememberMe"
-                    checked={loginData.rememberMe}
-                    onChange={handleLoginChange}
-                    className="w-4 h-4 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <label htmlFor="rememberMe" className="block ml-2 text-sm text-gray-700">
-                    Remember me
-                  </label>
+                <div className="relative p-6 overflow-hidden transition transform bg-white border shadow-sm group rounded-xl border-green-50 hover:scale-105">
+                  <div className="absolute inset-0 transition-opacity opacity-10 group-hover:opacity-20">
+                    <img
+                      src="https://images.pexels.com/photos/5650026/pexels-photo-5650026.jpeg"
+                      alt="Rewards"
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                  <div className="relative">
+                    <Gift className="w-8 h-8 mb-3 text-green-600" />
+                    <h3 className="mb-2 font-semibold text-gray-900">Rewards Program</h3>
+                    <p className="text-gray-600">Earn points on every purchase and get exclusive rewards.</p>
+                  </div>
                 </div>
-                
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex justify-center w-full px-4 py-2 font-medium text-white transition duration-200 bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                >
-                  {loading ? (
-                    <svg className="w-5 h-5 text-white animate-spin" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                  ) : (
-                    'Sign In'
+                <div className="relative p-6 overflow-hidden transition transform bg-white border shadow-sm group rounded-xl border-green-50 hover:scale-105">
+                  <div className="absolute inset-0 transition-opacity opacity-10 group-hover:opacity-20">
+                    <img
+                      src="https://images.pexels.com/photos/5632402/pexels-photo-5632402.jpeg"
+                      alt="Price Alerts"
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                  <div className="relative">
+                    <Star className="w-8 h-8 mb-3 text-green-600" />
+                    <h3 className="mb-2 font-semibold text-gray-900">Price Alerts</h3>
+                    <p className="text-gray-600">Get notified when prices drop on your favorite items.</p>
+                  </div>
+                </div>
+                <div className="relative p-6 overflow-hidden transition transform bg-white border shadow-sm group rounded-xl border-green-50 hover:scale-105">
+                  <div className="absolute inset-0 transition-opacity opacity-10 group-hover:opacity-20">
+                    <img
+                      src="https://images.pexels.com/photos/5632398/pexels-photo-5632398.jpeg"
+                      alt="Personalized Experience"
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                  <div className="relative">
+                    <Sparkles className="w-8 h-8 mb-3 text-green-600" />
+                    <h3 className="mb-2 font-semibold text-gray-900">Smart Lists</h3>
+                    <p className="text-gray-600">Create and share shopping lists with price comparisons.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Side - Auth Form */}
+            <div className="w-full max-w-md lg:ml-auto">
+              <div className="p-8 border border-green-100 shadow-lg bg-white/80 backdrop-blur-lg rounded-2xl">
+                <h2 className="mb-2 text-3xl font-bold text-gray-900">
+                  {isLogin ? 'Welcome Back!' : 'Join Bargain Buddy'}
+                </h2>
+                <p className="mb-8 text-gray-600">
+                  {isLogin
+                    ? 'Access your personalized shopping dashboard'
+                    : 'Start saving on your favorite products today'}
+                </p>
+
+                {error && (
+                  <div className="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50" role="alert">
+                    <span className="font-medium">Error:</span> {error}
+                  </div>
+                )}
+
+                {accountCreated && (
+                  <div className="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50" role="alert">
+                    <span className="font-medium">Account created successfully!</span> Please sign in.
+                  </div>
+                )}
+
+                <form className="space-y-6" onSubmit={handleSubmit}>
+                  {!isLogin && (
+                    <div>
+                      <label className="block mb-2 text-sm font-medium text-gray-700">
+                        Full Name
+                      </label>
+                      <div className="relative">
+                        <User className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-3 top-1/2" />
+                        <input
+                          type="text"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          className="w-full py-3 pl-10 pr-4 transition-colors border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          placeholder="Enter your full name"
+                        />
+                      </div>
+                    </div>
                   )}
-                </button>
-                
-                <div className="mt-6 text-center">
-                  <span className="text-gray-600">Don't have an account?</span>
-                  <button 
-                    type="button"
-                    onClick={() => setActiveTab('signup')}
-                    className="ml-1 text-blue-600 hover:underline"
-                  >
-                    Sign up now
-                  </button>
-                </div>
-              </form>
-            )}
-            
-            {/* Signup Form */}
-            {activeTab === 'signup' && (
-              <form onSubmit={handleSignup}>
-                <div className="mb-4">
-                  <label htmlFor="name" className="block mb-2 font-medium text-gray-700">Full Name</label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={signupData.name}
-                    onChange={handleSignupChange}
-                    className="w-full px-4 py-2 text-gray-800 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    required
-                  />
-                </div>
-                
-                <div className="mb-4">
-                  <label htmlFor="signupEmail" className="block mb-2 font-medium text-gray-700">Email</label>
-                  <input
-                    type="email"
-                    id="signupEmail"
-                    name="email"
-                    value={signupData.email}
-                    onChange={handleSignupChange}
-                    className="w-full px-4 py-2 text-gray-800 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    required
-                  />
-                </div>
-                
-                <div className="mb-4">
-                  <label htmlFor="signupPassword" className="block mb-2 font-medium text-gray-700">Password</label>
-                  <input
-                    type="password"
-                    id="signupPassword"
-                    name="password"
-                    value={signupData.password}
-                    onChange={handleSignupChange}
-                    className="w-full px-4 py-2 text-gray-800 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    required
-                  />
-                </div>
-                
-                <div className="mb-6">
-                  <label htmlFor="confirmPassword" className="block mb-2 font-medium text-gray-700">Confirm Password</label>
-                  <input
-                    type="password"
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    value={signupData.confirmPassword}
-                    onChange={handleSignupChange}
-                    className="w-full px-4 py-2 text-gray-800 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    required
-                  />
-                </div>
-                
-                <div className="flex items-center mb-6">
-                  <input
-                    type="checkbox"
-                    id="agreeToTerms"
-                    name="agreeToTerms"
-                    checked={signupData.agreeToTerms}
-                    onChange={handleSignupChange}
-                    className="w-4 h-4 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500"
-                    required
-                  />
-                  <label htmlFor="agreeToTerms" className="block ml-2 text-sm text-gray-700">
-                    I agree to the <a href="#" className="text-blue-600 hover:underline">Terms of Service</a> and <a href="#" className="text-blue-600 hover:underline">Privacy Policy</a>
-                  </label>
-                </div>
-                
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex justify-center w-full px-4 py-2 font-medium text-white transition duration-200 bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                >
-                  {loading ? (
-                    <svg className="w-5 h-5 text-white animate-spin" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                  ) : (
-                    'Create Account'
+
+                  <div>
+                    <label className="block mb-2 text-sm font-medium text-gray-700">
+                      Email Address
+                    </label>
+                    <div className="relative">
+                      <Mail className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-3 top-1/2" />
+                      <input
+                        type="email"
+                        value={mail}
+                        onChange={(e) => setMail(e.target.value)}
+                        className="w-full py-3 pl-10 pr-4 transition-colors border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        placeholder="Enter your email"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block mb-2 text-sm font-medium text-gray-700">
+                      Password
+                    </label>
+                    <div className="relative">
+                      <Lock className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-3 top-1/2" />
+                      <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="w-full py-3 pl-10 pr-4 transition-colors border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        placeholder="Enter your password"
+                      />
+                    </div>
+                  </div>
+
+                  {!isLogin && (
+                    <div>
+                      <label className="block mb-2 text-sm font-medium text-gray-700">
+                        Confirm Password
+                      </label>
+                      <div className="relative">
+                        <Lock className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-3 top-1/2" />
+                        <input
+                          type="password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          className="w-full py-3 pl-10 pr-4 transition-colors border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          placeholder="Confirm your password"
+                        />
+                      </div>
+                    </div>
                   )}
-                </button>
-                
-                <div className="mt-6 text-center">
-                  <span className="text-gray-600">Already have an account?</span>
-                  <button 
-                    type="button"
-                    onClick={() => setActiveTab('login')}
-                    className="ml-1 text-blue-600 hover:underline"
+
+                  {!isLogin && (
+                    <div>
+                      <label className="block mb-2 text-sm font-medium text-gray-700">
+                        Location
+                      </label>
+                      <div className="relative">
+                        <MapPin className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-3 top-1/2" />
+                        <input
+                          type="text"
+                          value={location}
+                          onChange={(e) => setLocation(e.target.value)}
+                          className="w-full py-3 pl-10 pr-4 transition-colors border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          placeholder="Enter your location"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {!isLogin && (
+                    <div>
+                      <label className="block mb-2 text-sm font-medium text-gray-700">
+                        Description
+                      </label>
+                      <div className="relative">
+                        {/* No icon for description */}
+                        <textarea
+                          value={description}
+                          onChange={(e) => setDescription(e.target.value)}
+                          className="w-full py-3 pl-4 pr-4 transition-colors border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          placeholder="Enter your description"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {isLogin && (
+                    <div className="flex items-center justify-between">
+                      <label className="flex items-center">
+                        <input type="checkbox" className="text-green-600 border-gray-300 rounded focus:ring-green-500" />
+                        <span className="ml-2 text-sm text-gray-600">Remember me</span>
+                      </label>
+                      <a href="#" className="text-sm font-medium text-green-600 hover:text-green-700">
+                        Forgot password?
+                      </a>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center gap-2 font-medium shadow-md"
                   >
-                    Sign in
+                    {isLogin ? 'Sign In' : 'Create Account'}
+                    <ArrowRight className="w-5 h-5" />
                   </button>
+                </form>
+
+                <div className="mt-8 text-center">
+                  <p className="text-gray-600">
+                    {isLogin ? "Don't have an account? " : "Already have an account? "}
+                    <button
+                      onClick={() => {
+                        setIsLogin(!isLogin);
+                        setAccountCreated(false); // Reset accountCreated when switching forms
+                      }}
+                      className="font-medium text-green-600 hover:text-green-700"
+                    >
+                      {isLogin ? 'Sign Up' : 'Sign In'}
+                    </button>
+                  </p>
                 </div>
-              </form>
-            )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
