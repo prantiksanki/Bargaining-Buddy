@@ -1,6 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { Search, ExternalLink, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Search, MessageSquareText, ChevronRight, Loader2, AlertTriangle } from 'lucide-react'; // Added Loader2, AlertTriangle
 import { useNavigate } from 'react-router-dom';
+
+// Assuming formatPrice helper is available or defined here
+const formatPrice = (price) => {
+  if (typeof price === 'number') {
+    return `₹${price.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+  }
+  if (typeof price === 'string' && price.trim() !== '') {
+    return price;
+  }
+  return 'N/A';
+};
+
+const API_BASE_URL = 'http://localhost:5000'; // Centralize API URL
 
 const HeroSection = () => {
   const [query, setQuery] = useState('');
@@ -67,9 +80,9 @@ const HeroSection = () => {
       setFiltered([]);
     } else {
       const matches = products.filter((product) =>
-        (product?.title || product?.name || '').toLowerCase().includes(query.toLowerCase())
+        (product?.title || '').toLowerCase().includes(query.toLowerCase())
       );
-      setFiltered(matches);
+      setFiltered(matches.slice(0, 6));
     }
   }, [query, products]);
 
@@ -89,64 +102,62 @@ const HeroSection = () => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gray-100">
-      <div className="flex flex-col items-center px-4 py-12 mx-auto md:flex-row max-w-7xl sm:px-6 lg:px-8">
-        {/* Left Content */}
-        <div className="w-full md:w-1/2 md:pr-8">
-          <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
-            Stop overpaying.
-            <br />
-            Start saving.
-          </h1>
-          <p className="mt-4 text-lg text-gray-600">
-            Real time price tracking, across Amazon, Flipkart, 1mg, and more.
-          </p>
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-gray-50 to-gray-200">
+      <div className="relative z-10 flex flex-col items-center px-4 py-16 mx-auto md:flex-row max-w-7xl sm:px-6 lg:px-8 md:py-24">
 
-          {/* Search Bar */}
-          <div className="relative flex items-center mt-8">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <Search className="w-5 h-5 text-gray-400" />
-            </div>
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="block w-full py-3 pl-10 pr-4 text-gray-900 transition-all duration-300 bg-white border border-gray-300 rounded-full shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-            />
-            <button className="px-6 py-3 ml-2 font-medium text-white transition-all duration-300 rounded-full shadow bg-emerald-500 hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-             onClick={() => {
-              if (query.trim()) {
-                navigate(`/result/${query}`);
-              }
-            }}>
-              Search
-            </button>
-          </div>
+        {/* Left Content: Headline, Search */}
+        <div className="w-full md:w-1/2 md:pr-12 text-center md:text-left">
+           {/* ... (Headline, Description, Search Bar, Suggestions, Feature Buttons remain the same) ... */}
+           <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
+             Stop overpaying.
+             <br />
+             <span className="text-emerald-600">Start saving smarter.</span>
+           </h1>
+           <p className="mt-4 text-lg text-gray-600 md:mt-6">
+             Real-time price tracking across Amazon, Flipkart, and more. Find the best deals effortlessly.
+           </p>
 
-          {/* Dropdown for filtered search results */}
-          {filtered.length > 0 && (
-            <div className="absolute z-10 w-full mt-1 overflow-auto bg-white rounded-md shadow-lg max-h-60 md:max-w-xl">
-              <ul className="py-1">
-                {filtered.map((item, index) => (
-                  <li
-                    key={index}
-                    className="px-4 py-2 text-gray-700 transition-colors duration-200 cursor-pointer hover:bg-emerald-50"
-                    onClick={() => {
-                      setQuery(item.title || item.name);
-                      setFiltered([]);
-                      navigate(`/comparison?search=${encodeURIComponent(item.title || item.name)}`);
-                    }}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span>{item.title || item.name}</span>
-                      <span className="font-medium text-emerald-600">22% off</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+           {/* Search Bar & Suggestions */}
+           <div className="relative mt-8 md:mt-10 max-w-xl mx-auto md:mx-0">
+             <div className="flex items-center">
+               <div className="relative flex-grow">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                    <Search className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search for products (e.g., iPhone 15)"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit()}
+                    className="block w-full py-3 pl-12 pr-4 text-gray-900 transition-all duration-300 bg-white border border-gray-300 rounded-full shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 placeholder-gray-400"
+                  />
+               </div>
+               <button
+                  onClick={handleSearchSubmit}
+                  className="flex-shrink-0 px-5 py-3 ml-2 text-sm font-semibold text-white transition-colors duration-300 rounded-full shadow-md bg-emerald-500 hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+                >
+                 Search
+               </button>
+             </div>
+
+             {/* Dropdown for filtered search results */}
+             {filtered.length > 0 && (
+               <div className="absolute left-0 right-0 z-20 mt-1 overflow-hidden origin-top bg-white rounded-xl shadow-lg ring-1 ring-black ring-opacity-5">
+                 <ul className="py-1 overflow-y-auto max-h-60">
+                   {filtered.map((item, index) => (
+                     <li
+                       key={item.id || index}
+                       className="px-4 py-2 text-sm text-gray-700 transition-colors duration-150 cursor-pointer hover:bg-emerald-50 hover:text-emerald-800"
+                       onMouseDown={() => handleSuggestionClick(item)}
+                     >
+                       {item.title}
+                     </li>
+                   ))}
+                 </ul>
+               </div>
+             )}
+           </div>
 
           {/* Feature Buttons */}
           <div className="flex flex-wrap gap-4 mt-8">
