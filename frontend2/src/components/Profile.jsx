@@ -14,16 +14,36 @@ import {
   Bell
 } from 'lucide-react';
 
+
+// accountCreated	2025-04-25T19:32:38.701Z
+// description	lklk
+// email	sanyam@gmail.com
+// location	nn
+// name	Sanyam
+// password	1234
+// todos	[]
+
+
+
+
 const Profile = ({ user }) => {
   // Ensure user data is available, provide defaults if not
+  const name = localStorage.getItem('name')
+  const username = localStorage.getItem('name') 
+  const location = localStorage.getItem('location') 
+  const email = localStorage.getItem('email')  
+  const joined = localStorage.getItem('accountCreated')
+  const bio = localStorage.getItem('description')
+
+  
   const userData = user || {
-    name: 'User Name',
-    username: '@username',
-    location: 'Location',
-    email: 'email@example.com',
-    joined: 'Date',
-    bio: 'User bio here.',
-    profileImage: '/default-profile.jpg', // Provide a default image
+    name,
+    username,
+    location,
+    email,
+    joined,
+    bio,
+    profileImage: 'https://www.pngkey.com/png/full/115-1150152_default-profile-picture-avatar-png-green.png', // Provide a default image
   };
 
   return (

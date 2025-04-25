@@ -13,7 +13,7 @@ const NavBar = () => {
           {/* Logo and Brand */}
           <div className="flex items-center flex-shrink-0">
             <Link 
-              to="/" 
+              to="/home" 
               className="flex items-center space-x-2"
             >
               <ShoppingBag className="w-8 h-8 text-emerald-500" />
