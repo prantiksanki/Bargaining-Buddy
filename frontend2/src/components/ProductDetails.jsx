@@ -136,9 +136,9 @@ const ProductPage = ({ searchQuery }) => {
               <div className="flex items-center justify-between mb-6 md:mb-8">
                 <h2 className="text-2xl font-bold text-gray-800">Price Matrix</h2>
                 {/* Search button functionality might need separate implementation */}
-                <button className="p-2 text-gray-500 transition-colors duration-200 rounded-full hover:bg-gray-200 hover:text-gray-700">
+                {/* <button className="p-2 text-gray-500 transition-colors duration-200 rounded-full hover:bg-gray-200 hover:text-gray-700">
                   <Search className="w-6 h-6" />
-                </button>
+                </button> */}
               </div>
 
               {/* Price Info - Check for prices array and its length */}

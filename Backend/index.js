@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const user = require("./models/User.js");
+const nodemailer = require("nodemailer");
 
 
 // Import Routes
@@ -65,6 +66,89 @@ app.post("/login" , (req,res) =>
       res.status(500).json({ error: "Internal server error" });
     });
 })
+
+
+app.post("/alert", async (req, res) => {
+  const { email, price, title, currentPrice, link } = req.body;
+  console.log("Received data:", { email, price, title, currentPrice, link });
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL,
+      pass: process.env.PASSWORD,
+    },
+  });
+
+  const mailOptions = {
+    from: 'BurgainBuddy',
+    to: email,
+    subject: '💸 Price Drop Alert: Your Deal Is Here!',
+    html: `<!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Price Drop Alert</title>
+      </head>
+      <body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 0; margin: 0;">
+        <table align="center" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; margin: 40px auto; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+          <tr>
+            <td style="padding: 20px; background-color: #27ae60; color: white; border-top-left-radius: 10px; border-top-right-radius: 10px;">
+              <h2 style="margin: 0;">🎯 Price Drop Alert!</h2>
+              <p style="margin: 0;">Your product just hit your target price! 🎉</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 24px;">
+              <p style="font-size: 16px;">Hi <strong>Bargain Hunter</strong>,</p>
+              <p style="font-size: 16px;">We’ve got exciting news! A product you’re watching on <strong>BargainBuddy</strong> is now below your target price. Time to grab the deal!</p>
+
+              <table style="margin-top: 20px; font-size: 16px; width: 100%;">
+                <tr>
+                  <td style="padding: 6px 0;"><strong>🛍️ Product:</strong></td>
+                  <td style="padding: 6px 0;">${title}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0;"><strong>💸 Current Price:</strong></td>
+                  <td style="padding: 6px 0; color: #27ae60;"><strong>₹ ${currentPrice}</strong></td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0;"><strong>🎯 Your Target:</strong></td>
+                  <td style="padding: 6px 0;">₹${price}</td>
+                </tr>
+              </table>
+
+              <div style="text-align: center; margin-top: 30px;">
+                <a href="${link}" target="_blank" style="background-color: #27ae60; color: white; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+                  🔗 Buy Now
+                </a>
+              </div>
+
+              <p style="margin-top: 30px;">Hurry — these deals disappear fast!</p>
+              <p>Thanks for using <strong>BargainBuddy</strong> to shop smart and save more.</p>
+
+              <p style="margin-top: 20px;">🛒 Happy Bargain Hunting!<br>– The BargainBuddy Team</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color: #f1f1f1; text-align: center; padding: 12px; font-size: 12px; color: #777; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
+              © 2025 BargainBuddy · All rights reserved.
+            </td>
+          </tr>
+        </table>
+      </body>
+      </html>`,
+  };
+
+  try {
+    const result = await transporter.sendMail(mailOptions);
+    res.status(200).send({ success: true, message: "Email sent", result });
+  } catch (error) {
+    console.error("Email sending failed:", error);
+    res.status(500).send({ success: false, message: "Failed to send email", error });
+  }
+});
 
 
 
