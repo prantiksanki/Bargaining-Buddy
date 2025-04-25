@@ -18,7 +18,7 @@ const recentSearchSchema = new mongoose.Schema({
 recentSearchSchema.pre('save', async function(next) {
     const count = await mongoose.model('RecentSearch').countDocuments();
     // Define a limit, e.g., 1000 recent searches globally stored
-    const limit = 20;
+    const limit = 1000;
     if (count >= limit) {
         // Find the oldest entry and remove it
         const oldest = await mongoose.model('RecentSearch').findOne().sort({ searchedAt: 1 });
