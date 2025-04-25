@@ -9,17 +9,12 @@ const HeroSection = () => {
   const [isCardHovered, setIsCardHovered] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [recentProduct, setRecentProduct] = useState(null); // State to hold recent product
-  const [isLoading, setIsLoading] = useState(false); // Add loading state
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchRecentProduct = async () => {
-      setIsLoading(true); // Set loading to true when fetching starts
       try {
         const res = await fetch('http://localhost:5000/products/recent-searches');
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
         const data = await res.json();
         console.log("Recent product data:", data);
 
@@ -33,8 +28,6 @@ const HeroSection = () => {
       } catch (err) {
         console.error('Error fetching recent product:', err);
         setSelectedProduct(null); // Handle error by setting a default or null
-      } finally {
-        setIsLoading(false); // Set loading to false when fetching ends
       }
     };
 
@@ -42,35 +35,32 @@ const HeroSection = () => {
   }, []);
 
   useEffect(() => {
-    const fetchRecentProductDetails = async () => {
-      if (!selectedProduct?.id) {
-        console.log("No selected product ID, skipping fetchRecentProductDetails");
-        return;
-      }
-      setIsLoading(true); // Set loading to true when fetching starts
-
+    const fetchRecentProduct = async () => {
       try {
         const res = await fetch(`http://localhost:5000/product/${selectedProduct.id}`);
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
         const data = await res.json();
-        console.log("Recent product details:", data);
-        setRecentProduct(data);
+        console.log("Recent product data:", data);
+
+        if (data && data.length > 0) {
+          // Assuming the API returns an array of recent searches, take the first one
+          console.log(data)
+          setRecentProduct(data[0].product);
+        } else {
+          console.warn("No recent products found.");
+          setSelectedProduct(null); // Or set a default product
+        }
       } catch (err) {
-        console.error('Error fetching recent product details:', err);
-        setRecentProduct(null);
-      } finally {
-        setIsLoading(false); // Set loading to false when fetching ends
+        console.error('Error fetching recent product:', err);
+        setSelectedProduct(null); // Handle error by setting a default or null
       }
     };
 
-    fetchRecentProductDetails();
+    fetchRecentProduct();
+  }, []);
 
-  }, [selectedProduct]);
 
 
-  console.log("Selected product:", recentProduct);
+  
 
   useEffect(() => {
     if (query.trim() === '') {
@@ -87,6 +77,15 @@ const HeroSection = () => {
     if (selectedProduct) {
       navigate(`/comparison?search=${encodeURIComponent(selectedProduct.id)}`);
     }
+  };
+
+  const mockProduct = {
+    id: "123",
+    title: "Apple AirPods Pro",
+    image: "url_to_image",
+    originalPrice: 249.99,
+    discountPrice: 194.99,
+    stores: ["Amazon", "Best Buy", "Apple Store"],
   };
 
   return (
@@ -168,59 +167,67 @@ const HeroSection = () => {
 
         {/* Right Content - Product Showcase */}
         <div className="relative flex items-center justify-center w-full mt-10 md:w-1/2 md:mt-0">
-          <div
+          <div 
             className={`relative w-80 md:w-96 transition-all duration-500 ${isCardHovered ? 'scale-105' : 'scale-100'}`}
             onMouseEnter={() => setIsCardHovered(true)}
             onMouseLeave={() => setIsCardHovered(false)}
           >
-            {isLoading ? (
-              <div>Loading recent product...</div>
-            ) : recentProduct ? (
-              <div className="relative overflow-hidden rounded-3xl" style={{ backgroundColor: '#34D399' }}>
-                {/* Product Image */}
-                <div className="relative flex items-center justify-center w-full h-40">
-                  <img
-                    src={recentProduct.image}
-                    alt={recentProduct.title}
-                    className="max-w-full max-h-40"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = "/placeholder-image.svg";
-                    }}
-                  />
-                  <a href={recentProduct.xerveLink} target="_blank" rel="noopener noreferrer" className="absolute p-2 bg-white rounded-full top-2 right-2 hover:bg-gray-100">
-                    <ExternalLink className="w-4 h-4 text-emerald-600" />
-                  </a>
+            {selectedProduct ? (
+              <div className="relative p-6 overflow-hidden shadow-xl bg-emerald-500 rounded-3xl">
+                {/* Background Pattern */}
+                <div className="absolute inset-0 opacity-10">
+                  <div className="absolute w-40 h-40 bg-white rounded-full -right-8 -top-8"></div>
+                  <div className="absolute w-40 h-40 bg-white rounded-full -left-8 -bottom-8"></div>
                 </div>
+                
+                <button className="absolute z-10 p-2 transition-colors duration-300 bg-white rounded-full shadow-md top-4 right-4 hover:bg-gray-100">
+                  <ExternalLink className="w-4 h-4 text-emerald-600" />
+                </button>
 
-                {/* Product Info */}
-                <div className="p-4">
-                  <h3 className="text-xl font-bold text-white">{recentProduct.title}</h3>
-                  <div className="flex items-center mt-2">
-                    <span className="text-white line-through opacity-80">Rs. {recentProduct.prices[0].mrp}</span>
-                    <span className="ml-2 text-2xl font-bold text-white">Rs. {recentProduct.prices[0].price}</span>
+                <div className="relative flex flex-col items-center">
+                  {/* Product Image */}
+                  <div className="relative flex items-center justify-center w-full h-40 mb-4">
+                    <img
+                      src={selectedProduct.image}
+                      alt={selectedProduct.title}
+                      className={`h-40 object-contain transition-all duration-500 ${isCardHovered ? 'scale-110' : 'scale-100'}`}
+                      onError={(e) => {
+                        e.target.onerror = null; // prevent infinite loop
+                        e.target.src="/placeholder-image.svg"
+                      }}
+                    />
                   </div>
-                </div>
 
-                {/* Available at Stores */}
-                <div className="p-4">
-                  <p className="text-sm font-medium text-white">Available at:</p>
-                  <div className="mt-2 space-y-2">
-                    {recentProduct.prices.map((store, index) => (
-                      <a key={index} href={store.url} target="_blank" rel="noopener noreferrer">
-                        <div className="flex items-center justify-between p-2 bg-white rounded-lg bg-opacity-10 hover:bg-opacity-20">
-                          <span className="text-white">{store.retailer}</span>
+                  {/* Product Info */}
+                  <div className="mt-4 text-center">
+                    <h3 className="text-xl font-bold text-white">{selectedProduct.title}</h3>
+                    {/* <div className="flex items-center justify-center mt-2 space-x-3">
+                      <span className="text-white line-through text-opacity-80">${selectedProduct.price}</span>
+                      <span className="text-2xl font-bold text-white">${selectedProduct.discountPrice}</span>
+                    </div> */}
+                  </div>
+
+                  {/* Discount Badge */}
+                  {/* <div className={`absolute p-2 bg-gray-900 rounded-full -top-3 -right-3 transform transition-all duration-300 ${isCardHovered ? 'scale-110 rotate-12' : 'scale-100 rotate-0'}`}>
+                    <span className="px-1 text-sm font-bold text-white">{selectedProduct.discountPercent}%</span>
+                  </div> */}
+
+                  {/* Stores Available */}
+                  {/* <div className="w-full mt-6">
+                    <div className="mb-2 text-sm font-medium text-white">Available at:</div>
+                    <div className="space-y-2">
+                      {selectedProduct.stores && selectedProduct.stores.map((store, index) => (
+                        <div key={index} className="flex items-center justify-between p-2 transition-colors duration-300 bg-white rounded-lg bg-opacity-10 hover:bg-opacity-20">
+                          <span className="text-white">{store}</span>
                           <ChevronRight className="w-4 h-4 text-white" />
                         </div>
-                      </a>
-                    ))}
-                  </div>
-                </div>
+                      ))}
+                    </div>
+                  </div> */}
 
-                {/* Compare Button */}
-                <div className="p-4">
-                  <button
-                    className="w-full py-3 font-medium transition-all duration-300 bg-white rounded-full shadow-lg text-emerald-600 hover:bg-gray-50"
+                  {/* Compare Button */}
+                  <button 
+                    className={`mt-6 px-6 py-3 bg-white rounded-full text-emerald-600 font-medium shadow-lg hover:bg-gray-50 transition-all duration-300 ${isCardHovered ? 'scale-105' : 'scale-100'}`}
                     onClick={handleComparePrices}
                   >
                     Compare Prices
@@ -228,7 +235,7 @@ const HeroSection = () => {
                 </div>
               </div>
             ) : (
-              <div>No recent product found.</div> // Display message when no product is available
+              <div>Loading recent product...</div>
             )}
           </div>
         </div>
