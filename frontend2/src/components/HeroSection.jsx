@@ -150,15 +150,21 @@ const HeroSection = () => {
 
           {/* Feature Buttons */}
           <div className="flex flex-wrap gap-4 mt-8">
-            <button className="flex items-center justify-center px-6 py-3 text-sm font-medium text-white transition-colors duration-300 rounded-lg bg-emerald-500 hover:bg-emerald-600">
+            <button className="flex items-center justify-center px-6 py-3 text-sm font-medium text-white transition-colors duration-300 rounded-lg bg-emerald-500 hover:bg-emerald-600"
+            onClick={() => navigate('/result/electronics')}
+            >
               <span className="mr-2">○</span>
               Electronics
             </button>
-            <button className="flex items-center justify-center px-6 py-3 text-sm font-medium text-gray-700 transition-colors duration-300 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400">
+            <button className="flex items-center justify-center px-6 py-3 text-sm font-medium text-gray-700 transition-colors duration-300 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400"
+            onClick={() => navigate('/result/fashion')}
+            >
               <span className="mr-2">♡</span>
               Fashion Deals
             </button>
-            <button className="flex items-center justify-center px-6 py-3 text-sm font-medium text-gray-700 transition-colors duration-300 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400">
+            <button className="flex items-center justify-center px-6 py-3 text-sm font-medium text-gray-700 transition-colors duration-300 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400"
+            onClick={() => navigate('/result/grocery')}
+            >
               <span className="mr-2">⊕</span>
               Grocery Deals
             </button>
