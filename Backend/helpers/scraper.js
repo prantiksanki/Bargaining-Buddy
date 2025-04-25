@@ -12,7 +12,7 @@ puppeteer.use(StealthPlugin());
 async function searchProducts(query) {
   console.log(`Searching for: ${query}`);
   const browser = await puppeteer.launch({
-    headless: true, // Keep headless true for production/efficiency
+    headless: false, // Keep headless true for production/efficiency
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
   const page = await browser.newPage();
@@ -200,7 +200,7 @@ async function scrapeProductById(productId) {
 
   const productUrl = product.xerveLink; // Get URL from the DB document
 
-  const browser = await puppeteer.launch({ headless: true, args: ["--no-sandbox", "--disable-setuid-sandbox"] });
+  const browser = await puppeteer.launch({ headless: false, args: ["--no-sandbox", "--disable-setuid-sandbox"] });
   const page = await browser.newPage();
 
   try {
@@ -274,7 +274,7 @@ async function scrapeProductById(productId) {
               if (rawPrice !== "N/A" && rawPrice !== "Notify Me") {
                   // Enhanced Price Parsing: Handles ₹, commas, ranges (use lowest), MRP, discount %
                   const priceNumbers = rawPrice.match(/₹?\s*([\d,]+(?:\.\d+)?)/g); // Find all currency amounts
-                  const discountMatch = rawPrice.match(/(\d+)%\s*off/i);
+                  const discountMatch = rawPrice.match(/(\d+)%/);
 
                   if (priceNumbers) {
                       // Assume the first number is the current price
@@ -307,6 +307,10 @@ async function scrapeProductById(productId) {
                   inStock = false; // Definitely out of stock if price is N/A or Notify Me
               }
 
+
+
+              // filter out nullish mrp values and do not add them to prices array
+                if (mrp === null || isNaN(mrp)) { return;}
 
               // Only add if we have a valid price or it's explicitly out of stock
               if (inStock || rawPrice === "Notify Me") {
