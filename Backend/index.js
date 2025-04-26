@@ -1,15 +1,15 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const dotenv = require("dotenv");
-const cors = require("cors");
-const user = require("./models/User.js");
-const nodemailer = require("nodemailer");
+import express from "express";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import cors from "cors";
+import User from "./models/User.js";
+import nodemailer from "nodemailer";
 
 
 // Import Routes
-const productRoutes = require("./routes/productRoutes");
-const priceHistoryRoutes = require("./routes/priceHistoryRoutes");
-const scraperRoutes = require("./routes/scraperRoutes.js");  
+import productRoutes from "./routes/productRoutes.js";
+import priceHistoryRoutes from "./routes/priceHistoryRoutes.js";
+import scraperRoutes from "./routes/scraperRoutes.js";  
 
 // Load environment variables
 dotenv.config();
@@ -32,7 +32,7 @@ app.use("/", scraperRoutes); // Scraper route
 app.post("/signup", (req, res) => {
   const {name, mail, password, location, description } = req.body;
   console.log("Received data:", { name, mail, password, location, description });
-  const newUser = new user({
+  const newUser = new User({
     name,
     mail,
     password,
@@ -41,7 +41,7 @@ app.post("/signup", (req, res) => {
   });
   newUser.save()
     .then(() => {
-      res.status(201).json({ message: "User created successfully" });
+      res.redirect("/login");
     })
     .catch((err) => {
       console.error("Error creating user:", err);
@@ -53,10 +53,10 @@ app.post("/login" , (req,res) =>
 {
   const { mail, password } = req.body;
   console.log("Received data:", { mail, password });
-  user.find({ mail, password })
+  User.find({ mail, password })
     .then((user) => {
       if (user.length > 0) {
-        res.status(200).json({ message: "Login successful" , user });
+        res.status(200).json({ message: "Login successful", user });
       } else {
         res.status(401).json({ message: "Invalid credentials" });
       }
@@ -81,28 +81,28 @@ app.post("/alert", async (req, res) => {
   });
 
   const mailOptions = {
-    from: 'BurgainBuddy',
+    from: 'BargainBuddy',
     to: email,
-    subject: '💸 Price Drop Alert: Your Deal Is Here!',
+    subject: '🔔 Price Alert Set: We’ll Notify You!',
     html: `<!DOCTYPE html>
       <html lang="en">
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-        <title>Price Drop Alert</title>
+        <title>Price Alert Set</title>
       </head>
       <body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 0; margin: 0;">
         <table align="center" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; margin: 40px auto; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
           <tr>
-            <td style="padding: 20px; background-color: #27ae60; color: white; border-top-left-radius: 10px; border-top-right-radius: 10px;">
-              <h2 style="margin: 0;">🎯 Price Drop Alert!</h2>
-              <p style="margin: 0;">Your product just hit your target price! 🎉</p>
+            <td style="padding: 20px; background-color: #2980b9; color: white; border-top-left-radius: 10px; border-top-right-radius: 10px;">
+              <h2 style="margin: 0;">🔔 Price Alert Set!</h2>
+              <p style="margin: 0;">We’ll notify you when your product hits your expected price.</p>
             </td>
           </tr>
           <tr>
             <td style="padding: 24px;">
               <p style="font-size: 16px;">Hi <strong>Bargain Hunter</strong>,</p>
-              <p style="font-size: 16px;">We’ve got exciting news! A product you’re watching on <strong>BargainBuddy</strong> is now below your target price. Time to grab the deal!</p>
+              <p style="font-size: 16px;">Your price alert for the following product has been set on <strong>BargainBuddy</strong>:</p>
 
               <table style="margin-top: 20px; font-size: 16px; width: 100%;">
                 <tr>
@@ -110,22 +110,22 @@ app.post("/alert", async (req, res) => {
                   <td style="padding: 6px 0;">${title}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 6px 0;"><strong>💸 Current Price:</strong></td>
-                  <td style="padding: 6px 0; color: #27ae60;"><strong>₹ ${currentPrice}</strong></td>
+                  <td style="padding: 6px 0;"><strong>💰 Current Price:</strong></td>
+                  <td style="padding: 6px 0; color: #2980b9;"><strong>₹ ${currentPrice}</strong></td>
                 </tr>
                 <tr>
-                  <td style="padding: 6px 0;"><strong>🎯 Your Target:</strong></td>
+                  <td style="padding: 6px 0;"><strong>🎯 Your Expected Price:</strong></td>
                   <td style="padding: 6px 0;">₹${price}</td>
                 </tr>
               </table>
 
               <div style="text-align: center; margin-top: 30px;">
-                <a href="${link}" target="_blank" style="background-color: #27ae60; color: white; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
-                  🔗 Buy Now
+                <a href="${link}" target="_blank" style="background-color: #2980b9; color: white; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+                  🔗 View Product
                 </a>
               </div>
 
-              <p style="margin-top: 30px;">Hurry — these deals disappear fast!</p>
+              <p style="margin-top: 30px;">We’ll keep an eye on the price and notify you as soon as it drops to your expected value.</p>
               <p>Thanks for using <strong>BargainBuddy</strong> to shop smart and save more.</p>
 
               <p style="margin-top: 20px;">🛒 Happy Bargain Hunting!<br>– The BargainBuddy Team</p>
@@ -154,7 +154,7 @@ app.post("/alert", async (req, res) => {
 
 // Connect to MongoDB
 mongoose
-  .connect("mongodb://localhost:27017/bargainbuddy" || process.env.MONGO_URI , {
+  .connect(process.env.MONGO_URI || "mongodb://localhost:27017/bargainbuddy", {
     useNewUrlParser: true,
     useUnifiedTopology: true
   })
@@ -164,7 +164,7 @@ mongoose
   .catch((err) => console.error("❌ MongoDB Connection Error:", err));
 
 // Default Route
-app.get("/", (req, res) => {
+app.get("/", (_req, res) => {
   res.send("Welcome to BargainBuddy API 🎉");
 });
 
